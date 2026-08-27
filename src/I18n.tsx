@@ -30,7 +30,7 @@ export const t: Translate = (text, options) =>
     ...options,
   }) ?? text;
 
-const I18nContext = createContext<I18nValue<any> | null>(null);
+const I18nContext = createContext<I18nValue | null>(null);
 
 export const useI18n = <T extends string = string>() => {
   const context = useContext(I18nContext);
@@ -95,7 +95,7 @@ export const I18nProvider = <T extends Languages>({
         language,
         locale,
         languages: Object.keys(languages),
-        setLanguage,
+        setLanguage: value => setLanguage(value as Language<T> | undefined),
         t: translate,
       }}
     >
