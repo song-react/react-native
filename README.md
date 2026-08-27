@@ -19,3 +19,20 @@ import { FlashList, Pressable, Text, TextInput, View } from '@song-react/react-n
 同时直接导出固定为 2.3.2 的 `FlashList` 修正版。实际实现来自
 [`@song-react/flash-list`](https://github.com/song-react/flash-list)，无需宿主工程配置
 `patch-package`；`patches/@shopify+flash-list+2.3.2.patch` 仅保留为修正来源记录。
+
+`I18nProvider` 接收与 `languages.json` 相同的语言表，以及由宿主保存的语言状态：
+
+```tsx
+<I18nProvider
+  languages={languages}
+  language={language}
+  setLanguage={setLanguage}
+  defaultLanguage="zh-Hans"
+>
+  {children}
+</I18nProvider>
+```
+
+组件内使用 `useI18n()` 获取 `language`、当前生效的 `locale`、`setLanguage` 和 `t`；非
+Hook 代码可直接使用全局 `t()`。语言未指定时自动匹配系统语言，找不到时使用
+`defaultLanguage` 或语言表第一项。

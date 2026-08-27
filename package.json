@@ -17,6 +17,8 @@
     "expo": "*",
     "expo-blur": "*",
     "expo-image": "*",
+    "expo-localization": "*",
+    "i18n-js": "*",
     "react": "*",
     "react-native": "*",
     "react-native-svg": "*"
