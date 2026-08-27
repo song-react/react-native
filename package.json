@@ -2,8 +2,8 @@
   "name": "@song-react/react-native",
   "version": "0.1.0",
   "description": "Lean reusable React Native primitives for Expo projects",
-  "main": "src/index.ts",
-  "react-native": "src/index.ts",
+  "main": "src/index.js",
+  "react-native": "src/index.js",
   "types": "src/index.ts",
   "sideEffects": false,
   "files": [
