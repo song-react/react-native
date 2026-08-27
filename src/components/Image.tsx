@@ -16,30 +16,57 @@ type ImageStyle = ExpoImageProps['style'] &
   Pick<ViewStyle, 'aspectRatio' | 'width' | 'height'>;
 
 export type ImageProps = Omit<ExpoImageProps, 'source' | 'style'> &
-  SvgProps & {
+  Omit<SvgProps, 'height' | 'style' | 'width'> & {
     source?: ExpoImageProps['source'] | FC<SvgProps>;
+    width?: SvgProps['width'];
+    height?: SvgProps['height'];
+    borderRadius?: ViewStyle['borderRadius'];
     style?: ImageStyle;
   };
 
 const ImageImpl = (
-  { source: Source, style, onLoad, ...props }: ImageProps,
+  {
+    source: Source,
+    width,
+    height,
+    borderRadius,
+    style,
+    onLoad,
+    ...props
+  }: ImageProps,
   ref: ForwardedRef<ComponentRef<typeof ExpoImage>>
 ) => {
   const [aspectRatio, setAspectRatio] = useState<number>();
   const measure =
     typeof Source !== 'function' &&
     !Array.isArray(style) &&
-    (props.width == null || props.height == null) &&
+    (width == null || height == null) &&
     style?.aspectRatio == null &&
     (style?.width == null || style?.height == null);
 
-  if (typeof Source === 'function') return <Source {...props} />;
+  if (typeof Source === 'function')
+    return (
+      <Source
+        {...props}
+        width={width ?? undefined}
+        height={height ?? undefined}
+        style={[{ borderRadius }, style] as SvgProps['style']}
+      />
+    );
 
   return (
     <ExpoImage
       ref={ref}
-      source={Source}
-      style={measure ? [{ aspectRatio }, style] : style}
+      source={typeof Source === 'string' ? Source.replace(/^http:/, 'https:') : Source}
+      style={[
+        measure ? { aspectRatio } : undefined,
+        {
+          width: width as ViewStyle['width'],
+          height: height as ViewStyle['height'],
+          borderRadius,
+        },
+        style,
+      ]}
       placeholderContentFit='cover'
       enforceEarlyResizing
       onLoad={event => {
