@@ -1,5 +1,5 @@
 {
-  "name": "@song-react/react-native-basic",
+  "name": "@song-react/react-native",
   "version": "0.1.0",
   "description": "Lean reusable React Native primitives for Expo projects",
   "main": "src/index.ts",
@@ -29,7 +29,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/song-react/react-native-basic.git"
+    "url": "https://github.com/song-react/react-native.git"
   },
   "license": "MIT"
 }
