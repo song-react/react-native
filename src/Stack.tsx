@@ -12,12 +12,19 @@ type StackProps = Omit<PressableProps, 'children' | 'style'> & {
 
 const alignments = { start: 'flex-start', center: 'center', end: 'flex-end' } as const;
 
-export const Column = ({ alignment, spacing = 0, onPress, disabled, style, ...props }: StackProps) =>
+export const Column = ({
+  alignment,
+  spacing = 0,
+  onPress,
+  disabled,
+  style,
+  ...props
+}: StackProps) =>
   onPress ? (
     <Pressable
       onPress={onPress}
       disabled={disabled}
-      style={state => [
+      style={(state) => [
         { gap: spacing, alignItems: alignment ? alignments[alignment] : undefined },
         typeof style === 'function' ? style(state) : style,
       ]}
@@ -33,12 +40,19 @@ export const Column = ({ alignment, spacing = 0, onPress, disabled, style, ...pr
     />
   );
 
-export const Row = ({ alignment, spacing = 0, onPress, disabled, style, ...props }: StackProps) =>
+export const Row = ({
+  alignment,
+  spacing = 0,
+  onPress,
+  disabled,
+  style,
+  ...props
+}: StackProps) =>
   onPress ? (
     <Pressable
       onPress={onPress}
       disabled={disabled}
-      style={state => [
+      style={(state) => [
         {
           flexDirection: 'row',
           gap: spacing,

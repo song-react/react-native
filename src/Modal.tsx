@@ -13,13 +13,17 @@ export type ModalProps = Omit<NativeModalProps, 'backdropColor'> & {
 };
 
 export const Modal = forwardRef<ComponentRef<typeof NativeModal>, ModalProps>(
-  ({ children, containerStyle, animationType = 'fade', onRequestClose, ...props }, ref) => (
+  (
+    { children, containerStyle, animationType = 'fade', onRequestClose, ...props },
+    ref
+  ) => (
     <NativeModal
       ref={ref}
       transparent
       animationType={animationType}
       onRequestClose={onRequestClose}
-      {...props}>
+      {...props}
+    >
       <View
         style={{
           flex: 1,
@@ -27,7 +31,8 @@ export const Modal = forwardRef<ComponentRef<typeof NativeModal>, ModalProps>(
           alignItems: 'center',
           paddingHorizontal: animationType === 'slide' ? 0 : 12,
           backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        }}>
+        }}
+      >
         <NativePressable
           onPress={onRequestClose}
           style={{ position: 'absolute', inset: 0 }}
@@ -42,7 +47,8 @@ export const Modal = forwardRef<ComponentRef<typeof NativeModal>, ModalProps>(
               borderRadius: 6,
             },
             containerStyle,
-          ]}>
+          ]}
+        >
           {children}
         </View>
       </View>

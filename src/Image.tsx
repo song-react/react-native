@@ -1,9 +1,16 @@
 import { Image as ExpoImage, type ImageProps as ExpoImageProps } from 'expo-image';
-import { forwardRef, useState, type ComponentRef, type FC, type ForwardedRef } from 'react';
+import {
+  forwardRef,
+  useState,
+  type ComponentRef,
+  type FC,
+  type ForwardedRef,
+} from 'react';
 import { Image as NativeImage, type ViewStyle } from 'react-native';
 import type { SvgProps } from 'react-native-svg';
 
-type ImageStyle = ExpoImageProps['style'] & Pick<ViewStyle, 'aspectRatio' | 'width' | 'height'>;
+type ImageStyle = ExpoImageProps['style'] &
+  Pick<ViewStyle, 'aspectRatio' | 'width' | 'height'>;
 
 export type ImageProps = Omit<ExpoImageProps, 'source' | 'style'> &
   SvgProps & {
@@ -32,7 +39,7 @@ const ImageImpl = (
       style={measure ? [{ aspectRatio }, style] : style}
       placeholderContentFit='cover'
       enforceEarlyResizing
-      onLoad={event => {
+      onLoad={(event) => {
         if (measure && event.source.width && event.source.height)
           setAspectRatio(event.source.width / event.source.height);
         onLoad?.(event);

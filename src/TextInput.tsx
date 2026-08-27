@@ -68,22 +68,23 @@ export const TextInput = forwardRef<ComponentRef<typeof NativeTextInput>, TextIn
               borderRadius: 6,
             },
             contentStyle,
-          ]}>
+          ]}
+        >
           {prefix}
           <NativeTextInput
             ref={input}
             style={[{ flex: 1, minWidth: 0, paddingVertical: 0, fontSize: 16 }, style]}
-            onChangeText={value => {
+            onChangeText={(value) => {
               if (!initialised.current && value.trim()) {
                 initialised.current = true;
                 input.current?.setNativeProps({ text: value });
               }
               onChangeText?.(value);
             }}
-            onFocus={event => {
+            onFocus={(event) => {
               onFocus?.(event);
             }}
-            onBlur={event => {
+            onBlur={(event) => {
               onBlur?.(event);
             }}
             {...props}
