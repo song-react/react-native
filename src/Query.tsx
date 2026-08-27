@@ -90,25 +90,25 @@ export const getQueryClient = () => {
 
 export const QueryProvider = ({
   children,
-  onQueryError,
-  onMutationError,
+  onQuery,
+  onMutation,
 }: PropsWithChildren<{
-  onQueryError?: (error: unknown) => void;
-  onMutationError?: (error: unknown) => void;
+  onQuery?: (error: unknown) => void;
+  onMutation?: (error: unknown) => void;
 }>) => {
   useEffect(() => {
     const client = getQueryClient();
-    const unsubQuery = onQueryError
+    const unsubQuery = onQuery
       ? client.getQueryCache().subscribe(event => {
           if (event.type === 'updated' && event.action.type === 'error') {
-            onQueryError(event.action.error);
+            onQuery(event.action.error);
           }
         })
       : undefined;
-    const unsubMutation = onMutationError
+    const unsubMutation = onMutation
       ? client.getMutationCache().subscribe(event => {
           if (event.type === 'updated' && event.action.type === 'error') {
-            onMutationError(event.action.error);
+            onMutation(event.action.error);
           }
         })
       : undefined;
@@ -116,7 +116,7 @@ export const QueryProvider = ({
       unsubQuery?.();
       unsubMutation?.();
     };
-  }, [onMutationError, onQueryError]);
+  }, [onMutation, onQuery]);
 
   return (
     <QueryClientProvider client={getQueryClient()}>{children}</QueryClientProvider>
