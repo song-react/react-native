@@ -7,25 +7,14 @@ import {
 } from 'react';
 import {
   TextInput as _TextInput,
-  type StyleProp,
   type TextInputProps as _TextInputProps,
-  type ViewStyle,
 } from 'react-native/index.js';
-import { Text, type TextProps } from './Text';
 import { View, type ViewProps } from './View';
 
-export type TextInputProps = _TextInputProps & {
+export type TextInputProps = Omit<_TextInputProps, 'children'> & {
   containerProps?: ViewProps;
-  contentStyle?: StyleProp<ViewStyle>;
-  title?: string;
-  tips?: string;
-  error?: string;
   prefix?: ReactNode;
   suffix?: ReactNode;
-  children?: ReactNode;
-  titleStyle?: TextProps['style'];
-  tipsStyle?: TextProps['style'];
-  errorStyle?: TextProps['style'];
 };
 
 export const TextInput = forwardRef<
@@ -35,16 +24,8 @@ export const TextInput = forwardRef<
   (
     {
       containerProps,
-      contentStyle,
-      title,
-      tips,
-      error,
       prefix,
       suffix,
-      children,
-      titleStyle,
-      tipsStyle,
-      errorStyle,
       style,
       onChangeText,
       ...props
@@ -56,48 +37,37 @@ export const TextInput = forwardRef<
     useImperativeHandle(ref, () => input.current as _TextInput);
 
     return (
-      <View {...containerProps} style={[{ gap: 6 }, containerProps?.style]}>
-        {title ? (
-          <Text style={[{ fontSize: 14 }, titleStyle]}>{title}</Text>
-        ) : null}
-        <View
+      <View
+        {...containerProps}
+        style={[
+          {
+            minHeight: 44,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 6,
+            paddingHorizontal: 12,
+            borderRadius: 6,
+          },
+          containerProps?.style,
+        ]}
+      >
+        {prefix}
+        <_TextInput
+          ref={input}
           style={[
-            {
-              minHeight: 44,
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 6,
-              paddingHorizontal: 12,
-              borderRadius: 6,
-            },
-            contentStyle,
+            { flex: 1, minWidth: 0, paddingVertical: 0, fontSize: 16 },
+            style,
           ]}
-        >
-          {prefix}
-          <_TextInput
-            ref={input}
-            style={[
-              { flex: 1, minWidth: 0, paddingVertical: 0, fontSize: 16 },
-              style,
-            ]}
-            onChangeText={value => {
-              if (!initialised.current && value.trim()) {
-                initialised.current = true;
-                input.current?.setNativeProps({ text: value });
-              }
-              onChangeText?.(value);
-            }}
-            {...props}
-          />
-          {suffix}
-        </View>
-        {tips ? (
-          <Text style={[{ fontSize: 12 }, tipsStyle]}>{tips}</Text>
-        ) : null}
-        {error ? (
-          <Text style={[{ fontSize: 12 }, errorStyle]}>{error}</Text>
-        ) : null}
-        {children}
+          onChangeText={value => {
+            if (!initialised.current && value.trim()) {
+              initialised.current = true;
+              input.current?.setNativeProps({ text: value });
+            }
+            onChangeText?.(value);
+          }}
+          {...props}
+        />
+        {suffix}
       </View>
     );
   }
