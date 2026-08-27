@@ -35,7 +35,7 @@ const I18nContext = createContext<I18nValue | null>(null);
 export const useI18n = <T extends string = string>() => {
   const context = useContext(I18nContext);
   if (!context) throw new Error('缺少 I18nProvider');
-  return context as I18nValue<T>;
+  return context as unknown as I18nValue<T>;
 };
 
 const systemLanguage = <T extends Languages>(
