@@ -1,0 +1,28 @@
+{
+  "name": "@song-react/react-native-basic",
+  "version": "0.1.0",
+  "description": "Lean reusable React Native primitives for Expo projects",
+  "main": "src/index.ts",
+  "react-native": "src/index.ts",
+  "types": "src/index.ts",
+  "sideEffects": false,
+  "files": [
+    "src"
+  ],
+  "peerDependencies": {
+    "@expo/vector-icons": "*",
+    "expo": "*",
+    "expo-blur": "*",
+    "expo-image": "*",
+    "expo-video": "*",
+    "react": "*",
+    "react-native": "*",
+    "react-native-safe-area-context": "*",
+    "react-native-svg": "*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/song-react/react-native-basic.git"
+  },
+  "license": "MIT"
+}
