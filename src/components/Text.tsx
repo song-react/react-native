@@ -1,9 +1,9 @@
 import { Fragment, forwardRef, type ComponentRef, type ReactNode } from 'react';
 import {
   Linking,
-  Text as NativeText,
+  Text as _Text,
   type StyleProp,
-  type TextProps as NativeTextProps,
+  type TextProps as _TextProps,
   type TextStyle,
 } from 'react-native/index.js';
 
@@ -12,7 +12,7 @@ const MENTION = /(@[^\s@]+)(?=\s|$)/g;
 const LINK =
   /((?:[a-z][a-z0-9+.-]*:\/\/)?(?:[\p{L}\p{N}](?:[-_\p{L}\p{N}]*[\p{L}\p{N}])?\.)+(?:[a-z]{2,24}|xn--[a-z0-9-]{2,59}|中国|中國|香港|台湾|台灣|公司|网络|網絡)(?![.a-z0-9-])(?:[/?#][-\p{L}\p{N}._~!$&'()*+;=:@%/?#]*)?)/giu;
 
-export type TextProps = NativeTextProps & {
+export type TextProps = _TextProps & {
   ctx?: {
     link?: StyleProp<TextStyle>;
     mention?: StyleProp<TextStyle>;
@@ -29,7 +29,7 @@ const render = (
 
   return value.split(LINK).map((linkPart, linkIndex) =>
     linkIndex % 2 && ctx.link ? (
-      <NativeText
+      <_Text
         key={`l-${linkIndex}`}
         style={ctx.link}
         suppressHighlighting
@@ -40,16 +40,16 @@ const render = (
         }
       >
         {linkPart}
-      </NativeText>
+      </_Text>
     ) : (
       linkPart.split(MENTION).map((mentionPart, mentionIndex) =>
         mentionIndex % 2 && ctx.mention ? (
-          <NativeText
+          <_Text
             key={`m-${linkIndex}-${mentionIndex}`}
             style={ctx.mention}
           >
             {mentionPart}
-          </NativeText>
+          </_Text>
         ) : (
           mentionPart
             .split(CUSTOM)
@@ -68,14 +68,14 @@ const render = (
   );
 };
 
-export const Text = forwardRef<ComponentRef<typeof NativeText>, TextProps>(
+export const Text = forwardRef<ComponentRef<typeof _Text>, TextProps>(
   ({ children, style, ctx = {}, ...props }, ref) => (
-    <NativeText
+    <_Text
       ref={ref}
       style={[{ fontSize: 15, fontWeight: '400' }, style]}
       {...props}
     >
       {render(children, ctx)}
-    </NativeText>
+    </_Text>
   )
 );

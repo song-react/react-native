@@ -1,16 +1,16 @@
 import { forwardRef, type ComponentRef } from 'react';
 import {
-  Pressable as NativePressable,
-  type PressableProps as NativePressableProps,
+  Pressable as _Pressable,
+  type PressableProps as _PressableProps,
 } from 'react-native/index.js';
 
-export type PressableProps = NativePressableProps;
+export type PressableProps = _PressableProps;
 
 export const Pressable = forwardRef<
-  ComponentRef<typeof NativePressable>,
+  ComponentRef<typeof _Pressable>,
   PressableProps
 >(({ style, disabled, ...props }, ref) => (
-  <NativePressable
+  <_Pressable
     ref={ref}
     disabled={disabled}
     style={

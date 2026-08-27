@@ -1,14 +1,14 @@
 import { forwardRef, type ComponentRef } from 'react';
 import {
-  ScrollView as NativeScrollView,
-  type ScrollViewProps as NativeScrollViewProps,
+  ScrollView as _ScrollView,
+  type ScrollViewProps as _ScrollViewProps,
 } from 'react-native/index.js';
 
-export type ScrollViewProps = NativeScrollViewProps;
+export type ScrollViewProps = _ScrollViewProps;
 
 export const ScrollView = forwardRef<
-  ComponentRef<typeof NativeScrollView>,
+  ComponentRef<typeof _ScrollView>,
   ScrollViewProps
 >(({ style, ...props }, ref) => (
-  <NativeScrollView ref={ref} style={style} {...props} />
+  <_ScrollView ref={ref} style={style} {...props} />
 ));

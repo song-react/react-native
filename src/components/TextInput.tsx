@@ -6,15 +6,15 @@ import {
   type ReactNode,
 } from 'react';
 import {
-  TextInput as NativeTextInput,
+  TextInput as _TextInput,
   type StyleProp,
-  type TextInputProps as NativeTextInputProps,
+  type TextInputProps as _TextInputProps,
   type ViewStyle,
 } from 'react-native/index.js';
 import { Text, type TextProps } from './Text';
 import { View, type ViewProps } from './View';
 
-export type TextInputProps = NativeTextInputProps & {
+export type TextInputProps = _TextInputProps & {
   containerProps?: ViewProps;
   contentStyle?: StyleProp<ViewStyle>;
   title?: string;
@@ -29,7 +29,7 @@ export type TextInputProps = NativeTextInputProps & {
 };
 
 export const TextInput = forwardRef<
-  ComponentRef<typeof NativeTextInput>,
+  ComponentRef<typeof _TextInput>,
   TextInputProps
 >(
   (
@@ -51,9 +51,9 @@ export const TextInput = forwardRef<
     },
     ref
   ) => {
-    const input = useRef<NativeTextInput>(null);
+    const input = useRef<_TextInput>(null);
     const initialised = useRef(false);
-    useImperativeHandle(ref, () => input.current as NativeTextInput);
+    useImperativeHandle(ref, () => input.current as _TextInput);
 
     return (
       <View {...containerProps} style={[{ gap: 6 }, containerProps?.style]}>
@@ -74,7 +74,7 @@ export const TextInput = forwardRef<
           ]}
         >
           {prefix}
-          <NativeTextInput
+          <_TextInput
             ref={input}
             style={[
               { flex: 1, minWidth: 0, paddingVertical: 0, fontSize: 16 },

@@ -1,18 +1,18 @@
 import { forwardRef, type ComponentRef } from 'react';
 import {
-  Modal as NativeModal,
-  Pressable as NativePressable,
-  type ModalProps as NativeModalProps,
+  Modal as _Modal,
+  Pressable as _Pressable,
+  type ModalProps as _ModalProps,
   type StyleProp,
   type ViewStyle,
 } from 'react-native/index.js';
 import { View } from './View';
 
-export type ModalProps = Omit<NativeModalProps, 'backdropColor'> & {
+export type ModalProps = Omit<_ModalProps, 'backdropColor'> & {
   containerStyle?: StyleProp<ViewStyle>;
 };
 
-export const Modal = forwardRef<ComponentRef<typeof NativeModal>, ModalProps>(
+export const Modal = forwardRef<ComponentRef<typeof _Modal>, ModalProps>(
   (
     {
       children,
@@ -23,7 +23,7 @@ export const Modal = forwardRef<ComponentRef<typeof NativeModal>, ModalProps>(
     },
     ref
   ) => (
-    <NativeModal
+    <_Modal
       ref={ref}
       transparent
       animationType={animationType}
@@ -39,7 +39,7 @@ export const Modal = forwardRef<ComponentRef<typeof NativeModal>, ModalProps>(
           backgroundColor: 'rgba(0, 0, 0, 0.5)',
         }}
       >
-        <NativePressable
+        <_Pressable
           onPress={onRequestClose}
           style={{ position: 'absolute', inset: 0 }}
         />
@@ -58,6 +58,6 @@ export const Modal = forwardRef<ComponentRef<typeof NativeModal>, ModalProps>(
           {children}
         </View>
       </View>
-    </NativeModal>
+    </_Modal>
   )
 );

@@ -1,7 +1,4 @@
-import {
-  Image as ExpoImage,
-  type ImageProps as ExpoImageProps,
-} from 'expo-image';
+import { Image as _Image, type ImageProps as _ImageProps } from 'expo-image';
 import {
   forwardRef,
   useState,
@@ -9,22 +6,22 @@ import {
   type FC,
   type ForwardedRef,
 } from 'react';
-import { Image as NativeImage, type ViewStyle } from 'react-native/index.js';
+import { Image as __Image, type ViewStyle } from 'react-native/index.js';
 import type { SvgProps } from 'react-native-svg';
 
-type ImageStyle = ExpoImageProps['style'] &
+type ImageStyle = _ImageProps['style'] &
   Pick<ViewStyle, 'aspectRatio' | 'width' | 'height'>;
 
-export type ImageProps = Omit<ExpoImageProps, 'source' | 'style'> &
+export type ImageProps = Omit<_ImageProps, 'source' | 'style'> &
   Omit<SvgProps, 'height' | 'style' | 'width'> & {
-    source?: ExpoImageProps['source'] | FC<SvgProps>;
+    source?: _ImageProps['source'] | FC<SvgProps>;
     width?: SvgProps['width'];
     height?: SvgProps['height'];
     borderRadius?: ViewStyle['borderRadius'];
     style?: ImageStyle;
   };
 
-const ImageImpl = (
+const ImageImp = (
   {
     source: Source,
     width,
@@ -34,7 +31,7 @@ const ImageImpl = (
     onLoad,
     ...props
   }: ImageProps,
-  ref: ForwardedRef<ComponentRef<typeof ExpoImage>>
+  ref: ForwardedRef<ComponentRef<typeof _Image>>
 ) => {
   const [aspectRatio, setAspectRatio] = useState<number>();
   const measure =
@@ -55,7 +52,7 @@ const ImageImpl = (
     );
 
   return (
-    <ExpoImage
+    <_Image
       ref={ref}
       source={typeof Source === 'string' ? Source.replace(/^http:/, 'https:') : Source}
       style={[
@@ -81,8 +78,8 @@ const ImageImpl = (
 
 type ImageComponent = React.ForwardRefExoticComponent<
   React.PropsWithoutRef<ImageProps> &
-    React.RefAttributes<ComponentRef<typeof ExpoImage>>
-> & { getSize: typeof NativeImage.getSize };
+    React.RefAttributes<ComponentRef<typeof _Image>>
+> & { getSize: typeof __Image.getSize };
 
-export const Image = forwardRef(ImageImpl) as ImageComponent;
-Image.getSize = NativeImage.getSize;
+export const Image = forwardRef(ImageImp) as ImageComponent;
+Image.getSize = __Image.getSize;
