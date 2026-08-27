@@ -51,7 +51,13 @@ const systemLanguage = <T extends Languages>(
       : undefined,
     locale.languageCode,
   ].find(value => value && value in languages) as Language<T> | undefined;
-  const fallback = matched ?? defaultLanguage ?? keys[0];
+  const fallback =
+    matched ??
+    (locale.languageCode
+      ? keys.find(key => key.startsWith(`${locale.languageCode}-`))
+      : undefined) ??
+    defaultLanguage ??
+    keys[0];
   if (!fallback) throw new Error('languages 不能为空');
   return fallback;
 };
