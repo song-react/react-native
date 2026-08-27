@@ -2,7 +2,6 @@ export * from './Button';
 export * from './Image';
 export * from './Modal';
 export * from './Pressable';
-export * from './SafeAreaView';
 export * from './ScrollView';
 export * from './Stack';
 export * from './Text';
