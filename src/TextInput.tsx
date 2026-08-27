@@ -42,8 +42,6 @@ export const TextInput = forwardRef<ComponentRef<typeof NativeTextInput>, TextIn
       titleStyle,
       tipsStyle,
       errorStyle,
-      onFocus,
-      onBlur,
       style,
       onChangeText,
       ...props
@@ -80,12 +78,6 @@ export const TextInput = forwardRef<ComponentRef<typeof NativeTextInput>, TextIn
                 input.current?.setNativeProps({ text: value });
               }
               onChangeText?.(value);
-            }}
-            onFocus={(event) => {
-              onFocus?.(event);
-            }}
-            onBlur={(event) => {
-              onBlur?.(event);
             }}
             {...props}
           />

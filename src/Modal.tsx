@@ -44,7 +44,7 @@ export const Modal = forwardRef<ComponentRef<typeof NativeModal>, ModalProps>(
               maxWidth: '100%',
               maxHeight: '80%',
               padding: 12,
-              borderRadius: 6,
+              borderRadius: 10,
             },
             containerStyle,
           ]}
