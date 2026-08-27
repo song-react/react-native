@@ -47,8 +47,12 @@ export const getQueryClient = () => {
         persister: experimental_createQueryPersister({
           storage: {
             getItem: key => mmkv.getString(key) ?? null,
-            setItem: (key, value) => mmkv.set(key, value),
-            removeItem: key => mmkv.remove(key),
+            setItem: (key, value) => {
+              mmkv.set(key, value);
+            },
+            removeItem: key => {
+              mmkv.remove(key);
+            },
             entries: () =>
               mmkv
                 .getAllKeys()
