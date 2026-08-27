@@ -1,3 +1,5 @@
+export * from '@song-react/flash-list';
+
 export * from './Image';
 export * from './Modal';
 export * from './Pressable';

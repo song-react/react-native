@@ -7,8 +7,12 @@
   "types": "src/index.ts",
   "sideEffects": false,
   "files": [
+    "patches",
     "src"
   ],
+  "dependencies": {
+    "@song-react/flash-list": "github:song-react/flash-list#f5e2425"
+  },
   "peerDependencies": {
     "expo": "*",
     "expo-blur": "*",

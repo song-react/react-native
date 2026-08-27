@@ -1,0 +1,131 @@
+diff --git a/node_modules/@shopify/flash-list/src/recyclerview/RecyclerView.tsx b/node_modules/@shopify/flash-list/src/recyclerview/RecyclerView.tsx
+index 3c25e7e..d836b98 100644
+--- a/node_modules/@shopify/flash-list/src/recyclerview/RecyclerView.tsx
++++ b/node_modules/@shopify/flash-list/src/recyclerview/RecyclerView.tsx
+@@ -496,10 +496,6 @@ const RecyclerViewComponent = <T,>(
+     return undefined;
+   }, [maintainVisibleContentPosition, shouldMaintainVisibleContentPosition]);
+ 
+-  const shouldRenderFromBottom =
+-    recyclerViewManager.getDataLength() > 0 &&
+-    (maintainVisibleContentPosition?.startRenderingFromBottom ?? false);
+-
+   // Create view for measuring bounded size
+   const viewToMeasureBoundedSize = useMemo(() => {
+     return (
+@@ -587,25 +583,7 @@ const RecyclerViewComponent = <T,>(
+             horizontal={horizontal}
+             renderStack={recyclerViewManager.getRenderStack()}
+             getLayout={(index) => recyclerViewManager.getLayout(index)}
+-            getAdjustmentMargin={() => {
+-              if (!shouldRenderFromBottom || !recyclerViewManager.hasLayout()) {
+-                return 0;
+-              }
+-
+-              const windowSize = horizontal
+-                ? recyclerViewManager.getWindowSize().width
+-                : recyclerViewManager.getWindowSize().height;
+-              const childContainerSize = horizontal
+-                ? recyclerViewManager.getChildContainerDimensions().width
+-                : recyclerViewManager.getChildContainerDimensions().height;
+-
+-              return Math.max(
+-                0,
+-                windowSize -
+-                  childContainerSize -
+-                  recyclerViewManager.firstItemOffset
+-              );
+-            }}
++            getAdjustmentMargin={() => 0}
+             refHolder={refHolder}
+             onSizeChanged={validateItemSize}
+             renderItem={renderItem}
+diff --git a/node_modules/@shopify/flash-list/dist/recyclerview/RecyclerView.js b/node_modules/@shopify/flash-list/dist/recyclerview/RecyclerView.js
+index 6799c8a..035396e 100644
+--- a/node_modules/@shopify/flash-list/dist/recyclerview/RecyclerView.js
++++ b/node_modules/@shopify/flash-list/dist/recyclerview/RecyclerView.js
+@@ -316,8 +316,6 @@ const RecyclerViewComponent = (props, ref) => {
+         }
+         return undefined;
+     }, [maintainVisibleContentPosition, shouldMaintainVisibleContentPosition]);
+-    const shouldRenderFromBottom = recyclerViewManager.getDataLength() > 0 &&
+-        ((_e = maintainVisibleContentPosition === null || maintainVisibleContentPosition === void 0 ? void 0 : maintainVisibleContentPosition.startRenderingFromBottom) !== null && _e !== void 0 ? _e : false);
+     // Create view for measuring bounded size
+     const viewToMeasureBoundedSize = useMemo(() => {
+         return (React.createElement(CompatView, { style: {
+@@ -359,20 +357,7 @@ const RecyclerViewComponent = (props, ref) => {
+                 isHorizontalRTL && viewToMeasureBoundedSize,
+                 renderHeader,
+                 !isHorizontalRTL && viewToMeasureBoundedSize,
+-                React.createElement(ViewHolderCollection, { viewHolderCollectionRef: viewHolderCollectionRef, data: data, horizontal: horizontal, renderStack: recyclerViewManager.getRenderStack(), getLayout: (index) => recyclerViewManager.getLayout(index), getAdjustmentMargin: () => {
+-                        if (!shouldRenderFromBottom || !recyclerViewManager.hasLayout()) {
+-                            return 0;
+-                        }
+-                        const windowSize = horizontal
+-                            ? recyclerViewManager.getWindowSize().width
+-                            : recyclerViewManager.getWindowSize().height;
+-                        const childContainerSize = horizontal
+-                            ? recyclerViewManager.getChildContainerDimensions().width
+-                            : recyclerViewManager.getChildContainerDimensions().height;
+-                        return Math.max(0, windowSize -
+-                            childContainerSize -
+-                            recyclerViewManager.firstItemOffset);
+-                    }, refHolder: refHolder, onSizeChanged: validateItemSize, renderItem: renderItem, extraData: extraData, onCommitLayoutEffect: () => {
++                React.createElement(ViewHolderCollection, { viewHolderCollectionRef: viewHolderCollectionRef, data: data, horizontal: horizontal, renderStack: recyclerViewManager.getRenderStack(), getLayout: (index) => recyclerViewManager.getLayout(index), getAdjustmentMargin: () => 0, refHolder: refHolder, onSizeChanged: validateItemSize, renderItem: renderItem, extraData: extraData, onCommitLayoutEffect: () => {
+                         applyInitialScrollIndex();
+                         parentRecyclerViewContext === null || parentRecyclerViewContext === void 0 ? void 0 : parentRecyclerViewContext.unmarkChildLayoutAsPending(recyclerViewId);
+                         onCommitLayoutEffect === null || onCommitLayoutEffect === void 0 ? void 0 : onCommitLayoutEffect();
+diff --git a/node_modules/@shopify/flash-list/src/recyclerview/RecyclerViewManager.ts b/node_modules/@shopify/flash-list/src/recyclerview/RecyclerViewManager.ts
+index 41704d0..258379a 100644
+--- a/node_modules/@shopify/flash-list/src/recyclerview/RecyclerViewManager.ts
++++ b/node_modules/@shopify/flash-list/src/recyclerview/RecyclerViewManager.ts
+@@ -407,7 +407,21 @@ export class RecyclerViewManager<T> {
+     const layoutManager = this.layoutManager;
+     if (layoutManager) {
+       this.applyInitialScrollAdjustment();
+-      const visibleIndices = this.computeVisibleIndices();
++      let visibleIndices = this.computeVisibleIndices();
++      if (
++        visibleIndices.length > 0 &&
++        this.propsRef.maintainVisibleContentPosition?.startRenderingFromBottom
++      ) {
++        const endIndex = Math.min(
++          visibleIndices.endIndex,
++          this.getDataLength() - 1
++        );
++        const startIndex = Math.max(
++          0,
++          endIndex - this.initialDrawBatchSize + 1
++        );
++        visibleIndices = new ConsecutiveNumbers(startIndex, endIndex);
++      }
+       // console.log("---------> visibleIndices", visibleIndices);
+       this.hasRenderedProgressively = visibleIndices.every(
+         (index) =>
+diff --git a/node_modules/@shopify/flash-list/dist/recyclerview/RecyclerViewManager.js b/node_modules/@shopify/flash-list/dist/recyclerview/RecyclerViewManager.js
+index 1aa651d..122d839 100644
+--- a/node_modules/@shopify/flash-list/dist/recyclerview/RecyclerViewManager.js
++++ b/node_modules/@shopify/flash-list/dist/recyclerview/RecyclerViewManager.js
+@@ -5,6 +5,7 @@ import { RVGridLayoutManagerImpl } from "./layout-managers/GridLayoutManager";
+ import { RVLinearLayoutManagerImpl } from "./layout-managers/LinearLayoutManager";
+ import { RVMasonryLayoutManagerImpl } from "./layout-managers/MasonryLayoutManager";
+ import { RVEngagedIndicesTrackerImpl, } from "./helpers/EngagedIndicesTracker";
++import { ConsecutiveNumbers } from "./helpers/ConsecutiveNumbers";
+ import { RenderStackManager } from "./RenderStackManager";
+ // Abstracts layout manager, render stack manager and viewability manager and generates render stack (progressively on load)
+ export class RecyclerViewManager {
+@@ -314,7 +315,13 @@ export class RecyclerViewManager {
+         const layoutManager = this.layoutManager;
+         if (layoutManager) {
+             this.applyInitialScrollAdjustment();
+-            const visibleIndices = this.computeVisibleIndices();
++            let visibleIndices = this.computeVisibleIndices();
++            if (visibleIndices.length > 0 &&
++                this.propsRef.maintainVisibleContentPosition?.startRenderingFromBottom) {
++                const endIndex = Math.min(visibleIndices.endIndex, this.getDataLength() - 1);
++                const startIndex = Math.max(0, endIndex - this.initialDrawBatchSize + 1);
++                visibleIndices = new ConsecutiveNumbers(startIndex, endIndex);
++            }
+             // console.log("---------> visibleIndices", visibleIndices);
+             this.hasRenderedProgressively = visibleIndices.every((index) => layoutManager.getLayout(index).isHeightMeasured &&
+                 layoutManager.getLayout(index).isWidthMeasured);
