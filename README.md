@@ -39,4 +39,5 @@ Hook 代码可直接使用全局 `t()`。语言未指定时自动匹配系统语
 
 `QueryProvider` 内置与 `xz_rn` 一致的 `QueryClient`：开发环境 10 秒、生产环境 1 分钟
 过期，5 分钟回收内存，关闭自动重试，并使用 MMKV 按 query 独立持久化 7 天。需要在
-React 组件外操作缓存时使用同包导出的 `getQueryClient()`。
+React 组件外操作缓存时使用同包导出的 `getQueryClient()`。可通过 `onQueryError` 和
+`onMutationError` 分别接收全局查询、操作错误，由宿主决定日志、线路切换等业务处理。

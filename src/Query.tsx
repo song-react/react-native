@@ -3,7 +3,7 @@
 import { experimental_createQueryPersister } from '@tanstack/query-persist-client-core';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Paths } from 'expo-file-system';
-import type { PropsWithChildren } from 'react';
+import { useEffect, type PropsWithChildren } from 'react';
 import { createMMKV } from 'react-native-mmkv';
 
 let browserQueryClient: QueryClient | undefined;
@@ -88,6 +88,37 @@ export const getQueryClient = () => {
   return queryClient;
 };
 
-export const QueryProvider = ({ children }: PropsWithChildren) => (
-  <QueryClientProvider client={getQueryClient()}>{children}</QueryClientProvider>
-);
+export const QueryProvider = ({
+  children,
+  onQueryError,
+  onMutationError,
+}: PropsWithChildren<{
+  onQueryError?: (error: unknown) => void;
+  onMutationError?: (error: unknown) => void;
+}>) => {
+  useEffect(() => {
+    const client = getQueryClient();
+    const unsubQuery = onQueryError
+      ? client.getQueryCache().subscribe(event => {
+          if (event.type === 'updated' && event.action.type === 'error') {
+            onQueryError(event.action.error);
+          }
+        })
+      : undefined;
+    const unsubMutation = onMutationError
+      ? client.getMutationCache().subscribe(event => {
+          if (event.type === 'updated' && event.action.type === 'error') {
+            onMutationError(event.action.error);
+          }
+        })
+      : undefined;
+    return () => {
+      unsubQuery?.();
+      unsubMutation?.();
+    };
+  }, [onMutationError, onQueryError]);
+
+  return (
+    <QueryClientProvider client={getQueryClient()}>{children}</QueryClientProvider>
+  );
+};
