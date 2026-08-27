@@ -1,9 +1,11 @@
+import { type ReactNode } from 'react';
 import { type ViewProps } from 'react-native';
 import { Pressable, type PressableProps } from './Pressable';
 import { View } from './View';
 
-type StackProps = Omit<PressableProps, 'style'> & {
+type StackProps = Omit<PressableProps, 'children' | 'style'> & {
   alignment?: 'start' | 'center' | 'end';
+  children?: ReactNode;
   spacing?: number;
   style?: PressableProps['style'];
 };
