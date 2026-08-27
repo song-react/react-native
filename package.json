@@ -14,13 +14,17 @@
     "@song-react/flash-list": "github:song-react/flash-list#f5e2425"
   },
   "peerDependencies": {
+    "@tanstack/query-persist-client-core": "*",
+    "@tanstack/react-query": "*",
     "expo": "*",
     "expo-blur": "*",
+    "expo-file-system": "*",
     "expo-image": "*",
     "expo-localization": "*",
     "i18n-js": "*",
     "react": "*",
     "react-native": "*",
+    "react-native-mmkv": "*",
     "react-native-svg": "*"
   },
   "repository": {
