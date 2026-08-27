@@ -10,11 +10,9 @@
     "src"
   ],
   "peerDependencies": {
-    "@expo/vector-icons": "*",
     "expo": "*",
     "expo-blur": "*",
     "expo-image": "*",
-    "expo-video": "*",
     "react": "*",
     "react-native": "*",
     "react-native-safe-area-context": "*",

@@ -7,5 +7,4 @@ export * from './ScrollView';
 export * from './Stack';
 export * from './Text';
 export * from './TextInput';
-export * from './Video';
 export * from './View';

@@ -12,4 +12,4 @@ import { Button, Text, TextInput, View } from '@song-react/react-native-basic';
 </View>;
 ```
 
-导出：`Button`、`Image`、`Modal`、`Pressable`、`SafeAreaView`、`ScrollView`、`Text`、`TextInput`、`Video`、`View`，以及轻量的 `Row`、`Column`、`Spacer`。
+导出：`Button`、`Image`、`Modal`、`Pressable`、`SafeAreaView`、`ScrollView`、`Text`、`TextInput`、`View`，以及轻量的 `Row`、`Column`、`Spacer`。
