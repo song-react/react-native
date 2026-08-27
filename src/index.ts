@@ -5,6 +5,7 @@ export { FlashList } from '@song-react/flash-list';
 export type { FlashListProps, FlashListRef } from '@song-react/flash-list';
 
 export { Image } from './components/Image';
+export type { ImageProps as EnhancedImageProps } from './components/Image';
 export { Modal } from './components/Modal';
 export { Pressable } from './components/Pressable';
 export { ScrollView } from './components/ScrollView';
