@@ -11,7 +11,7 @@ import {
   type TextInputProps as NativeTextInputProps,
   type ViewStyle,
 } from 'react-native';
-import { Text } from './Text';
+import { Text, type TextProps } from './Text';
 import { View, type ViewProps } from './View';
 
 export type TextInputProps = NativeTextInputProps & {
