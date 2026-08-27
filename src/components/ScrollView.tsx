@@ -2,7 +2,7 @@ import { forwardRef, type ComponentRef } from 'react';
 import {
   ScrollView as NativeScrollView,
   type ScrollViewProps as NativeScrollViewProps,
-} from 'react-native';
+} from 'react-native/index.js';
 
 export type ScrollViewProps = NativeScrollViewProps;
 

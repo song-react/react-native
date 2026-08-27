@@ -2,7 +2,7 @@ import { forwardRef, type ComponentRef } from 'react';
 import {
   Pressable as NativePressable,
   type PressableProps as NativePressableProps,
-} from 'react-native';
+} from 'react-native/index.js';
 
 export type PressableProps = NativePressableProps;
 

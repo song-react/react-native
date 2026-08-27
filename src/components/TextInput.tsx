@@ -10,7 +10,7 @@ import {
   type StyleProp,
   type TextInputProps as NativeTextInputProps,
   type ViewStyle,
-} from 'react-native';
+} from 'react-native/index.js';
 import { Text, type TextProps } from './Text';
 import { View, type ViewProps } from './View';
 

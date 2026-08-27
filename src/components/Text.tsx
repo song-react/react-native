@@ -5,7 +5,7 @@ import {
   type StyleProp,
   type TextProps as NativeTextProps,
   type TextStyle,
-} from 'react-native';
+} from 'react-native/index.js';
 
 const CUSTOM = /(\[[^\]]+\])/g;
 const MENTION = /(@[^\s@]+)(?=\s|$)/g;

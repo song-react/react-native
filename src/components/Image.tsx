@@ -9,7 +9,7 @@ import {
   type FC,
   type ForwardedRef,
 } from 'react';
-import { Image as NativeImage, type ViewStyle } from 'react-native';
+import { Image as NativeImage, type ViewStyle } from 'react-native/index.js';
 import type { SvgProps } from 'react-native-svg';
 
 type ImageStyle = ExpoImageProps['style'] &

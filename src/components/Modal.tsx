@@ -5,7 +5,7 @@ import {
   type ModalProps as NativeModalProps,
   type StyleProp,
   type ViewStyle,
-} from 'react-native';
+} from 'react-native/index.js';
 import { View } from './View';
 
 export type ModalProps = Omit<NativeModalProps, 'backdropColor'> & {

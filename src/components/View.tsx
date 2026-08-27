@@ -4,7 +4,7 @@ import {
   View as NativeView,
   type ViewProps as NativeViewProps,
   type ViewStyle,
-} from 'react-native';
+} from 'react-native/index.js';
 
 export type { ViewStyle };
 export type ViewProps = NativeViewProps | BlurViewProps;
