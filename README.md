@@ -35,6 +35,8 @@ Expo 工程在 `tsconfig.json` 中将原生入口指向本包；Expo Metro 会�
 }
 ```
 
+确实需要绕过增强版输入框时，从同一入口使用 `NativeTextInput`。
+
 基础组件放在 `src/components/`，Provider 放在 `src/providers/`。导出与 `xz_rn`
 基础层一致的 `Image`、`Modal`、`Pressable`、`ScrollView`、`Text`、`TextInput`、`View`；
 不额外封装 Flex 布局组件。
