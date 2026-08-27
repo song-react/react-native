@@ -20,8 +20,11 @@ export type TextProps = NativeTextProps & {
   };
 };
 
-const render = (value: ReactNode, ctx: NonNullable<TextProps['ctx']>): ReactNode => {
-  if (Array.isArray(value)) return value.map((item) => render(item, ctx));
+const render = (
+  value: ReactNode,
+  ctx: NonNullable<TextProps['ctx']>
+): ReactNode => {
+  if (Array.isArray(value)) return value.map(item => render(item, ctx));
   if (typeof value !== 'string') return value;
 
   return value.split(LINK).map((linkPart, linkIndex) =>
@@ -31,7 +34,9 @@ const render = (value: ReactNode, ctx: NonNullable<TextProps['ctx']>): ReactNode
         style={ctx.link}
         suppressHighlighting
         onPress={() =>
-          Linking.openURL(linkPart.startsWith('http') ? linkPart : `https://${linkPart}`)
+          Linking.openURL(
+            linkPart.startsWith('http') ? linkPart : `https://${linkPart}`
+          )
         }
       >
         {linkPart}
@@ -39,7 +44,10 @@ const render = (value: ReactNode, ctx: NonNullable<TextProps['ctx']>): ReactNode
     ) : (
       linkPart.split(MENTION).map((mentionPart, mentionIndex) =>
         mentionIndex % 2 && ctx.mention ? (
-          <NativeText key={`m-${linkIndex}-${mentionIndex}`} style={ctx.mention}>
+          <NativeText
+            key={`m-${linkIndex}-${mentionIndex}`}
+            style={ctx.mention}
+          >
             {mentionPart}
           </NativeText>
         ) : (
@@ -62,7 +70,11 @@ const render = (value: ReactNode, ctx: NonNullable<TextProps['ctx']>): ReactNode
 
 export const Text = forwardRef<ComponentRef<typeof NativeText>, TextProps>(
   ({ children, style, ctx = {}, ...props }, ref) => (
-    <NativeText ref={ref} style={[{ fontSize: 15, fontWeight: '400' }, style]} {...props}>
+    <NativeText
+      ref={ref}
+      style={[{ fontSize: 15, fontWeight: '400' }, style]}
+      {...props}
+    >
       {render(children, ctx)}
     </NativeText>
   )

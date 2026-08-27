@@ -9,4 +9,6 @@ export type ScrollViewProps = NativeScrollViewProps;
 export const ScrollView = forwardRef<
   ComponentRef<typeof NativeScrollView>,
   ScrollViewProps
->(({ style, ...props }, ref) => <NativeScrollView ref={ref} style={style} {...props} />);
+>(({ style, ...props }, ref) => (
+  <NativeScrollView ref={ref} style={style} {...props} />
+));

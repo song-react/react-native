@@ -14,7 +14,13 @@ export type ModalProps = Omit<NativeModalProps, 'backdropColor'> & {
 
 export const Modal = forwardRef<ComponentRef<typeof NativeModal>, ModalProps>(
   (
-    { children, containerStyle, animationType = 'fade', onRequestClose, ...props },
+    {
+      children,
+      containerStyle,
+      animationType = 'fade',
+      onRequestClose,
+      ...props
+    },
     ref
   ) => (
     <NativeModal

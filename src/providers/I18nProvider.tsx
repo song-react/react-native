@@ -9,7 +9,10 @@ import {
 } from 'react';
 
 export type Languages = Record<string, Record<string, unknown>>;
-export type Language<T extends Languages = Languages> = Extract<keyof T, string>;
+export type Language<T extends Languages = Languages> = Extract<
+  keyof T,
+  string
+>;
 export type Translate = (text: string, options?: TranslateOptions) => string;
 
 type I18nValue<T extends string = string> = {

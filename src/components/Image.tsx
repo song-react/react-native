@@ -1,4 +1,7 @@
-import { Image as ExpoImage, type ImageProps as ExpoImageProps } from 'expo-image';
+import {
+  Image as ExpoImage,
+  type ImageProps as ExpoImageProps,
+} from 'expo-image';
 import {
   forwardRef,
   useState,
@@ -39,7 +42,7 @@ const ImageImpl = (
       style={measure ? [{ aspectRatio }, style] : style}
       placeholderContentFit='cover'
       enforceEarlyResizing
-      onLoad={(event) => {
+      onLoad={event => {
         if (measure && event.source.width && event.source.height)
           setAspectRatio(event.source.width / event.source.height);
         onLoad?.(event);
@@ -50,7 +53,8 @@ const ImageImpl = (
 };
 
 type ImageComponent = React.ForwardRefExoticComponent<
-  React.PropsWithoutRef<ImageProps> & React.RefAttributes<ComponentRef<typeof ExpoImage>>
+  React.PropsWithoutRef<ImageProps> &
+    React.RefAttributes<ComponentRef<typeof ExpoImage>>
 > & { getSize: typeof NativeImage.getSize };
 
 export const Image = forwardRef(ImageImpl) as ImageComponent;

@@ -28,7 +28,10 @@ export type TextInputProps = NativeTextInputProps & {
   errorStyle?: TextProps['style'];
 };
 
-export const TextInput = forwardRef<ComponentRef<typeof NativeTextInput>, TextInputProps>(
+export const TextInput = forwardRef<
+  ComponentRef<typeof NativeTextInput>,
+  TextInputProps
+>(
   (
     {
       containerProps,
@@ -54,7 +57,9 @@ export const TextInput = forwardRef<ComponentRef<typeof NativeTextInput>, TextIn
 
     return (
       <View {...containerProps} style={[{ gap: 6 }, containerProps?.style]}>
-        {title ? <Text style={[{ fontSize: 14 }, titleStyle]}>{title}</Text> : null}
+        {title ? (
+          <Text style={[{ fontSize: 14 }, titleStyle]}>{title}</Text>
+        ) : null}
         <View
           style={[
             {
@@ -71,8 +76,11 @@ export const TextInput = forwardRef<ComponentRef<typeof NativeTextInput>, TextIn
           {prefix}
           <NativeTextInput
             ref={input}
-            style={[{ flex: 1, minWidth: 0, paddingVertical: 0, fontSize: 16 }, style]}
-            onChangeText={(value) => {
+            style={[
+              { flex: 1, minWidth: 0, paddingVertical: 0, fontSize: 16 },
+              style,
+            ]}
+            onChangeText={value => {
               if (!initialised.current && value.trim()) {
                 initialised.current = true;
                 input.current?.setNativeProps({ text: value });
@@ -83,8 +91,12 @@ export const TextInput = forwardRef<ComponentRef<typeof NativeTextInput>, TextIn
           />
           {suffix}
         </View>
-        {tips ? <Text style={[{ fontSize: 12 }, tipsStyle]}>{tips}</Text> : null}
-        {error ? <Text style={[{ fontSize: 12 }, errorStyle]}>{error}</Text> : null}
+        {tips ? (
+          <Text style={[{ fontSize: 12 }, tipsStyle]}>{tips}</Text>
+        ) : null}
+        {error ? (
+          <Text style={[{ fontSize: 12 }, errorStyle]}>{error}</Text>
+        ) : null}
         {children}
       </View>
     );

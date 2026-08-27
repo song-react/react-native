@@ -119,6 +119,8 @@ export const QueryProvider = ({
   }, [onMutation, onQuery]);
 
   return (
-    <QueryClientProvider client={getQueryClient()}>{children}</QueryClientProvider>
+    <QueryClientProvider client={getQueryClient()}>
+      {children}
+    </QueryClientProvider>
   );
 };
