@@ -3,19 +3,19 @@ import { I18n, type TranslateOptions } from 'i18n-js';
 import { createContext, type ReactNode, useContext, useMemo } from 'react';
 
 let _I18n: I18n | undefined;
-let _languageCode: string | undefined;
+let _locale: string | undefined;
 
 export const t = (text: string, options?: TranslateOptions) =>
   _I18n?.t(text, {
     defaultValue: text,
-    locale: _languageCode,
+    locale: _locale,
     ...options,
   }) ?? text;
 
 const I18nContext = createContext<{
-  languageCode: string;
-  languageCodes: string[];
-  setLanguageCode: (languageCode?: string) => void;
+  locale: string;
+  locales: string[];
+  setLocale: (locale?: string) => void;
   t: (text: string, options?: TranslateOptions) => string;
 } | null>(null);
 
@@ -25,20 +25,18 @@ export const useI18n = () => {
   return context;
 };
 
-export const I18nProvider = <LanguageCode extends string,>({
+export const I18nProvider = <const Locale extends string,>({
   children,
   languages,
-  languageCode,
-  setLanguageCode,
+  locale,
+  setLocale,
 }: {
   children: ReactNode;
-  languages: Record<
-    LanguageCode,
-    Record<string, string | undefined> | undefined
-  >;
-  languageCode?: LanguageCode;
-  setLanguageCode: (languageCode?: LanguageCode) => void;
+  languages: Record<Locale, Record<string, string>>;
+  locale?: Locale;
+  setLocale: (locale?: Locale) => void;
 }) => {
+  const systemLocale = getLocales()[0].languageCode;
   _I18n = useMemo(
     () =>
       new I18n(languages, {
@@ -47,25 +45,28 @@ export const I18nProvider = <LanguageCode extends string,>({
       }),
     [languages]
   );
-  _languageCode =
-    languageCode || getLocales()[0].languageCode || Object.keys(languages)[0];
+  _locale =
+    locale ||
+    (systemLocale && Object.hasOwn(languages, systemLocale)
+      ? systemLocale
+      : Object.keys(languages)[0]);
 
-  if (!_languageCode) throw new Error('languages 不能为空');
+  if (!_locale) throw new Error('languages 不能为空');
 
   return (
     <I18nContext.Provider
       value={{
-        languageCode: _languageCode,
-        languageCodes: Object.keys(languages),
-        setLanguageCode: value => {
+        locale: _locale,
+        locales: Object.keys(languages),
+        setLocale: value => {
           if (value !== undefined && !Object.hasOwn(languages, value))
-            throw new Error(`不支持的语言代码: ${value}`);
-          setLanguageCode(value as LanguageCode | undefined);
+            throw new Error(`不支持的语言: ${value}`);
+          setLocale(value as Locale | undefined);
         },
         t: (text: string, options?: TranslateOptions) =>
           _I18n?.t(text, {
             defaultValue: text,
-            locale: _languageCode,
+            locale: _locale,
             ...options,
           }) ?? text,
       }}
