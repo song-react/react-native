@@ -9,12 +9,19 @@ import { createMMKV } from 'react-native-mmkv';
 let browserQueryClient: QueryClient | undefined;
 let queryStorage: ReturnType<typeof createMMKV> | undefined;
 
-const getQueryStorage = () =>
-  (queryStorage ??= createMMKV({
+const getQueryStorage = () => {
+  if (queryStorage) return queryStorage;
+  queryStorage = createMMKV({
     id: 'tanstack-query-cache',
     path: Paths.cache.uri.replace(/^file:\/\//, ''),
     mode: 'multi-process',
-  }));
+  });
+  if (queryStorage.getString('version') !== '2') {
+    queryStorage.clearAll();
+    queryStorage.set('version', '2');
+  }
+  return queryStorage;
+};
 
 export const getQueryClient = () => {
   if (browserQueryClient) return browserQueryClient;
@@ -66,6 +73,10 @@ export const getQueryClient = () => {
                 ),
           },
           maxAge: 7 * 24 * 60 * 60 * 1000,
+          // 登录态数据只留在内存；确认与账号无关的查询按需显式持久化。
+          filters: {
+            predicate: query => query.meta?.persist === true,
+          },
           // JSON 默认不支持 BigInt，持久化时添加前缀，读取时恢复原类型。
           serialize: data =>
             JSON.stringify(data, (_key, value) =>
