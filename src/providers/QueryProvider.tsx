@@ -7,15 +7,19 @@ import { useEffect, type PropsWithChildren } from 'react';
 import { createMMKV } from 'react-native-mmkv';
 
 let browserQueryClient: QueryClient | undefined;
+let queryStorage: ReturnType<typeof createMMKV> | undefined;
+
+const getQueryStorage = () =>
+  (queryStorage ??= createMMKV({
+    id: 'tanstack-query-cache',
+    path: Paths.cache.uri.replace(/^file:\/\//, ''),
+    mode: 'multi-process',
+  }));
 
 export const getQueryClient = () => {
   if (browserQueryClient) return browserQueryClient;
 
-  const mmkv = createMMKV({
-    id: 'tanstack-query-cache',
-    path: Paths.cache.uri.replace(/^file:\/\//, ''), // 使用 App 缓存目录，删除 App 时自动清除
-    mode: 'multi-process',
-  });
+  const mmkv = getQueryStorage();
   const queryClient = new QueryClient({
     // 时间线：
     // t=0:      首次请求 → queryFn → 数据存入内存和 MMKV
@@ -86,6 +90,11 @@ export const getQueryClient = () => {
   }
   // Server 每次创建新实例，避免请求之间共享缓存。
   return queryClient;
+};
+
+export const clearQueryCache = () => {
+  getQueryClient().clear();
+  getQueryStorage().clearAll();
 };
 
 export const QueryProvider = ({
