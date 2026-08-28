@@ -14,6 +14,7 @@ export const t = (text: string, options?: TranslateOptions) =>
 
 const I18nContext = createContext<{
   locale: string;
+  locales: string[];
   setLocale: (locale?: string) => void;
   t: (text: string, options?: TranslateOptions) => string;
 } | null>(null);
@@ -52,6 +53,7 @@ export const I18nProvider = <Locale extends string,>({
     <I18nContext.Provider
       value={{
         locale: _locale,
+        locales: Object.keys(languages),
         setLocale: value => {
           if (value !== undefined && !Object.hasOwn(languages, value))
             throw new Error(`不支持的语言: ${value}`);
