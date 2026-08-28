@@ -72,8 +72,7 @@ export const I18nProvider = <
             throw new Error(`不支持的语言: ${value}`);
           setLanguage(value as (keyof T & string) | undefined);
         },
-        t: (text: string, options?: TranslateOptions) =>
-          instance.t(text, { defaultValue: text, locale, ...options }),
+        t,
       }}
     >
       {children}
