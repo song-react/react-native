@@ -37,13 +37,11 @@ export const I18nProvider = <T extends Languages>({
   languages,
   language,
   setLanguage,
-  defaultLanguage,
 }: {
   children: ReactNode;
   languages: T;
   language?: Language<T>;
   setLanguage: (language?: Language<T>) => void;
-  defaultLanguage?: Language<T>;
 }) => {
   const [deviceLocale] = useLocales();
   const instance = useMemo(() => new I18n(languages), [languages]);
@@ -53,7 +51,6 @@ export const I18nProvider = <T extends Languages>({
   const locale =
     selectedLanguage ??
     languageKeys.find(key => key.split('-')[0] === deviceLocale.languageCode) ??
-    defaultLanguage ??
     languageKeys[0];
   if (!locale) throw new Error('languages 不能为空');
 
