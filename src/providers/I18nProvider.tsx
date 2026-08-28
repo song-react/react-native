@@ -44,7 +44,7 @@ export const I18nProvider = <
   setLanguage: (language?: keyof T & string) => void;
 }) => {
   const [deviceLocale] = useLocales();
-  const instance = useMemo(() => new I18n(languages), [languages]);
+  _I18n = useMemo(() => new I18n(languages), [languages]);
   const selectedLanguage =
     language && Object.hasOwn(languages, language) ? language : undefined;
   const systemLanguage = [
@@ -54,25 +54,27 @@ export const I18nProvider = <
       : undefined,
     deviceLocale.languageCode,
   ].find(value => value && Object.hasOwn(languages, value));
-  const locale =
+  _locale =
     selectedLanguage ?? systemLanguage ?? Object.keys(languages)[0];
 
-  if (!locale) throw new Error('languages 不能为空');
-
-  _I18n = instance;
-  _locale = locale;
+  if (!_locale) throw new Error('languages 不能为空');
 
   return (
     <I18nContext.Provider
       value={{
         language: selectedLanguage,
-        locale,
+        locale: _locale,
         setLanguage: value => {
           if (value !== undefined && !Object.hasOwn(languages, value))
             throw new Error(`不支持的语言: ${value}`);
           setLanguage(value as (keyof T & string) | undefined);
         },
-        t,
+        t: (text: string, options?: TranslateOptions) =>
+          _I18n?.t(text, {
+            defaultValue: text,
+            locale: _locale,
+            ...options,
+          }) ?? text,
       }}
     >
       {children}
