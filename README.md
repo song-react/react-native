@@ -63,6 +63,19 @@ Expo 工程在 `tsconfig.json` 中将原生入口指向本包；Expo Metro 会�
 跟随系统语言；系统语言不在语言表内时使用第一项，调用 `setLocale(undefined)` 可恢复
 跟随系统。
 
+宿主增加一次类型注册后，`locale` 会限制为语言表一级 key，`t()` 的首参会限制为所有
+语言共同拥有的二级 key：
+
+```ts
+import languages from '@/assets/languages.json';
+
+declare global {
+  interface SongReactNativeI18n {
+    languages: typeof languages;
+  }
+}
+```
+
 `QueryProvider` 内置与 `xz_rn` 一致的 `QueryClient`：开发环境 10 秒、生产环境 1 分钟
 过期，5 分钟回收内存，关闭自动重试，并使用 MMKV 按 query 独立持久化 7 天。需要在
 React 组件外操作缓存时使用同包导出的 `getQueryClient()`。可通过 `onQuery` 和

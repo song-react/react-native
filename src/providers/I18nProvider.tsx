@@ -2,10 +2,22 @@ import { getLocales } from 'expo-localization';
 import { I18n, type TranslateOptions } from 'i18n-js';
 import { createContext, type ReactNode, useContext, useMemo } from 'react';
 
-let _I18n: I18n | undefined;
-let _locale: string | undefined;
+declare global {
+  interface SongReactNativeI18n {}
+}
 
-export const t = (text: string, options?: TranslateOptions) =>
+type Languages = SongReactNativeI18n extends {
+  languages: infer Value extends Record<string, Record<string, string>>;
+}
+  ? Value
+  : Record<string, Record<string, string>>;
+type Locale = keyof Languages & string;
+type TranslationKey = keyof Languages[Locale] & string;
+
+let _I18n: I18n | undefined;
+let _locale: Locale | undefined;
+
+export const t = (text: TranslationKey, options?: TranslateOptions) =>
   _I18n?.t(text, {
     defaultValue: text,
     locale: _locale,
@@ -13,10 +25,10 @@ export const t = (text: string, options?: TranslateOptions) =>
   }) ?? text;
 
 const I18nContext = createContext<{
-  locale: string;
-  locales: string[];
-  setLocale: (locale?: string) => void;
-  t: (text: string, options?: TranslateOptions) => string;
+  locale: Locale;
+  locales: Locale[];
+  setLocale: (locale?: Locale) => void;
+  t: typeof t;
 } | null>(null);
 
 export const useI18n = () => {
@@ -25,14 +37,14 @@ export const useI18n = () => {
   return context;
 };
 
-export const I18nProvider = <const Locale extends string,>({
+export const I18nProvider = ({
   children,
   languages,
   locale,
   setLocale,
 }: {
   children: ReactNode;
-  languages: Record<Locale, Record<string, string>>;
+  languages: Languages;
   locale?: Locale;
   setLocale: (locale?: Locale) => void;
 }) => {
@@ -48,8 +60,8 @@ export const I18nProvider = <const Locale extends string,>({
   _locale =
     locale ||
     (systemLocale && Object.hasOwn(languages, systemLocale)
-      ? systemLocale
-      : Object.keys(languages)[0]);
+      ? (systemLocale as Locale)
+      : (Object.keys(languages)[0] as Locale | undefined));
 
   if (!_locale) throw new Error('languages 不能为空');
 
@@ -57,13 +69,13 @@ export const I18nProvider = <const Locale extends string,>({
     <I18nContext.Provider
       value={{
         locale: _locale,
-        locales: Object.keys(languages),
+        locales: Object.keys(languages) as Locale[],
         setLocale: value => {
           if (value !== undefined && !Object.hasOwn(languages, value))
             throw new Error(`不支持的语言: ${value}`);
-          setLocale(value as Locale | undefined);
+          setLocale(value);
         },
-        t: (text: string, options?: TranslateOptions) =>
+        t: (text: TranslationKey, options?: TranslateOptions) =>
           _I18n?.t(text, {
             defaultValue: text,
             locale: _locale,
