@@ -45,7 +45,7 @@ Expo 工程在 `tsconfig.json` 中将原生入口指向本包；Expo Metro 会�
 [`@song-react/flash-list`](https://github.com/song-react/flash-list)，无需宿主工程配置
 `patch-package`；`patches/@shopify+flash-list+2.3.2.patch` 仅保留为修正来源记录。
 
-`I18nProvider` 接收与 `languages.json` 相同的语言表，以及由宿主保存的语言状态：
+`I18nProvider` 接收包含 `zh-Hans`、`en` 的 `languages.json`，以及由宿主保存的语言状态：
 
 ```tsx
 <I18nProvider
