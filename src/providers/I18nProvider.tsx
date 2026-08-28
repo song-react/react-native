@@ -45,7 +45,9 @@ const systemLanguage = <T extends Languages>(
       ? `${locale.languageCode}-${locale.languageScriptCode}`
       : undefined,
     locale.languageCode,
-  ].find(value => value && value in languages) as Language<T> | undefined;
+  ].find(value => value && Object.hasOwn(languages, value)) as
+    | Language<T>
+    | undefined;
   const fallback =
     matched ??
     (locale.languageCode
@@ -73,7 +75,7 @@ export const I18nProvider = <T extends Languages>({
   const [deviceLocale] = useLocales();
   const instance = useMemo(() => new I18n(languages), [languages]);
   const selectedLanguage =
-    language && language in languages ? language : undefined;
+    language && Object.hasOwn(languages, language) ? language : undefined;
   const locale =
     selectedLanguage ??
     systemLanguage(languages, deviceLocale, defaultLanguage);
@@ -88,7 +90,7 @@ export const I18nProvider = <T extends Languages>({
         locale,
         languages: Object.keys(languages),
         setLanguage: (value?: string) => {
-          if (value !== undefined && !(value in languages))
+          if (value !== undefined && !Object.hasOwn(languages, value))
             throw new Error(`不支持的语言: ${value}`);
           setLanguage(value as Language<T> | undefined);
         },
