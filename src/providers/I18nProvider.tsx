@@ -7,12 +7,11 @@ export type Language<T extends Languages = Languages> = Extract<
   keyof T,
   string
 >;
-export type Translate = (text: string, options?: TranslateOptions) => string;
 
 let currentI18n: I18n | undefined;
 let currentLocale: string | undefined;
 
-export const t: Translate = (text, options) =>
+export const t = (text: string, options?: TranslateOptions) =>
   currentI18n?.t(text, {
     defaultValue: text,
     locale: currentLocale,
@@ -24,7 +23,7 @@ const I18nContext = createContext<{
   locale: string;
   languages: string[];
   setLanguage: (language?: string) => void;
-  t: Translate;
+  t: (text: string, options?: TranslateOptions) => string;
 } | null>(null);
 
 export const useI18n = () => {
