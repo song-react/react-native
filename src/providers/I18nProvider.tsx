@@ -1,4 +1,4 @@
-import { useLocales, type Locale } from 'expo-localization';
+import { useLocales } from 'expo-localization';
 import { I18n, type TranslateOptions } from 'i18n-js';
 import { createContext, type ReactNode, useContext, useMemo } from 'react';
 
@@ -33,32 +33,6 @@ export const useI18n = () => {
   return context;
 };
 
-const systemLanguage = <T extends Languages>(
-  languages: T,
-  locale: Locale,
-  defaultLanguage?: Language<T>
-) => {
-  const keys = Object.keys(languages) as Language<T>[];
-  const matched = [
-    locale.languageTag,
-    locale.languageCode && locale.languageScriptCode
-      ? `${locale.languageCode}-${locale.languageScriptCode}`
-      : undefined,
-    locale.languageCode,
-  ].find(value => value && Object.hasOwn(languages, value)) as
-    | Language<T>
-    | undefined;
-  const fallback =
-    matched ??
-    (locale.languageCode
-      ? keys.find(key => key.startsWith(`${locale.languageCode}-`))
-      : undefined) ??
-    defaultLanguage ??
-    keys[0];
-  if (!fallback) throw new Error('languages 不能为空');
-  return fallback;
-};
-
 export const I18nProvider = <T extends Languages>({
   children,
   languages,
@@ -74,11 +48,15 @@ export const I18nProvider = <T extends Languages>({
 }) => {
   const [deviceLocale] = useLocales();
   const instance = useMemo(() => new I18n(languages), [languages]);
+  const languageKeys = Object.keys(languages) as Language<T>[];
   const selectedLanguage =
     language && Object.hasOwn(languages, language) ? language : undefined;
   const locale =
     selectedLanguage ??
-    systemLanguage(languages, deviceLocale, defaultLanguage);
+    languageKeys.find(key => key.split('-')[0] === deviceLocale.languageCode) ??
+    defaultLanguage ??
+    languageKeys[0];
+  if (!locale) throw new Error('languages 不能为空');
 
   currentI18n = instance;
   currentLocale = locale;
@@ -88,7 +66,7 @@ export const I18nProvider = <T extends Languages>({
       value={{
         language: selectedLanguage,
         locale,
-        languages: Object.keys(languages),
+        languages: languageKeys,
         setLanguage: (value?: string) => {
           if (value !== undefined && !Object.hasOwn(languages, value))
             throw new Error(`不支持的语言: ${value}`);
