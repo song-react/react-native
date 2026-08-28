@@ -13,9 +13,8 @@ export const t = (text: string, options?: TranslateOptions) =>
   }) ?? text;
 
 const I18nContext = createContext<{
-  language?: string;
   locale: string;
-  setLanguage: (language?: string) => void;
+  setLocale: (locale?: string) => void;
   t: (text: string, options?: TranslateOptions) => string;
 } | null>(null);
 
@@ -25,42 +24,43 @@ export const useI18n = () => {
   return context;
 };
 
-export const I18nProvider = <Language extends string,>({
+export const I18nProvider = <Locale extends string,>({
   children,
   languages,
-  language,
-  setLanguage,
+  locale,
+  setLocale,
 }: {
   children: ReactNode;
-  languages: Record<Language, Record<string, string | undefined>>;
-  language?: Language;
-  setLanguage: (language?: Language) => void;
+  languages: Record<Locale, Record<string, string | undefined>>;
+  locale?: Locale;
+  setLocale: (locale?: Locale) => void;
 }) => {
-  const [deviceLocale] = useLocales();
-  _I18n = useMemo(() => new I18n(languages), [languages]);
-  const selectedLanguage =
-    language && Object.hasOwn(languages, language) ? language : undefined;
-  const systemLanguage = [
-    deviceLocale.languageTag,
-    deviceLocale.languageCode && deviceLocale.languageScriptCode
-      ? `${deviceLocale.languageCode}-${deviceLocale.languageScriptCode}`
-      : undefined,
-    deviceLocale.languageCode,
-  ].find(value => value && Object.hasOwn(languages, value));
+  const [system] = useLocales();
+  _I18n = useMemo(
+    () =>
+      new I18n(languages, {
+        defaultLocale: Object.keys(languages)[0],
+        enableFallback: true,
+      }),
+    [languages]
+  );
   _locale =
-    selectedLanguage ?? systemLanguage ?? Object.keys(languages)[0];
+    locale ||
+    (system.languageCode === 'zh' && system.languageScriptCode === 'Hant'
+      ? 'zh-Hant'
+      : system.languageCode) ||
+    Object.keys(languages)[0];
 
   if (!_locale) throw new Error('languages 不能为空');
 
   return (
     <I18nContext.Provider
       value={{
-        language: selectedLanguage,
         locale: _locale,
-        setLanguage: value => {
+        setLocale: value => {
           if (value !== undefined && !Object.hasOwn(languages, value))
             throw new Error(`不支持的语言: ${value}`);
-          setLanguage(value as Language | undefined);
+          setLocale(value as Locale | undefined);
         },
         t: (text: string, options?: TranslateOptions) =>
           _I18n?.t(text, {

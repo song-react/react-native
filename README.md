@@ -51,16 +51,16 @@ Expo 工程在 `tsconfig.json` 中将原生入口指向本包；Expo Metro 会�
 ```tsx
 <I18nProvider
   languages={languages}
-  language={language}
-  setLanguage={setLanguage}
+  locale={locale}
+  setLocale={setLocale}
 >
   {children}
 </I18nProvider>
 ```
 
-组件内使用 `useI18n()` 获取 `language`、当前生效的 `locale`、`setLanguage` 和 `t`；非
-Hook 代码可直接使用全局 `t()`。`language` 为 `undefined` 时跟随系统语言，找不到时
-使用语言表第一项；调用 `setLanguage(undefined)` 可恢复跟随系统。
+组件内使用 `useI18n()` 获取当前生效的 `locale`、`setLocale` 和 `t`；非 Hook 代码可
+直接使用全局 `t()`。传入 Provider 的 `locale` 为 `undefined` 时跟随系统语言，找不到时
+使用语言表第一项；调用 `setLocale(undefined)` 可恢复跟随系统。
 
 `QueryProvider` 内置与 `xz_rn` 一致的 `QueryClient`：开发环境 10 秒、生产环境 1 分钟
 过期，5 分钟回收内存，关闭自动重试，并使用 MMKV 按 query 独立持久化 7 天。需要在
