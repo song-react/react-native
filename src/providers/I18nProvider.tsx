@@ -1,4 +1,4 @@
-import { getLocales, useLocales } from 'expo-localization';
+import { useLocales } from 'expo-localization';
 import { I18n, type TranslateOptions } from 'i18n-js';
 import { createContext, type ReactNode, useContext, useMemo } from 'react';
 
@@ -25,23 +25,16 @@ export const useI18n = () => {
   return context;
 };
 
-export const I18nProvider = <
-  T extends Record<
-    NonNullable<
-      ReturnType<typeof getLocales>[number]['languageCode' | 'languageTag']
-    >,
-    Record<string, string | undefined>
-  >,
->({
+export const I18nProvider = <Language extends string,>({
   children,
   languages,
   language,
   setLanguage,
 }: {
   children: ReactNode;
-  languages: T;
-  language?: keyof T & string;
-  setLanguage: (language?: keyof T & string) => void;
+  languages: Record<Language, Record<string, string | undefined>>;
+  language?: Language;
+  setLanguage: (language?: Language) => void;
 }) => {
   const [deviceLocale] = useLocales();
   _I18n = useMemo(() => new I18n(languages), [languages]);
@@ -67,7 +60,7 @@ export const I18nProvider = <
         setLanguage: value => {
           if (value !== undefined && !Object.hasOwn(languages, value))
             throw new Error(`不支持的语言: ${value}`);
-          setLanguage(value as (keyof T & string) | undefined);
+          setLanguage(value as Language | undefined);
         },
         t: (text: string, options?: TranslateOptions) =>
           _I18n?.t(text, {
