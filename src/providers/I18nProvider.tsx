@@ -1,4 +1,4 @@
-import { useLocales } from 'expo-localization';
+import { getLocales } from 'expo-localization';
 import { I18n, type TranslateOptions } from 'i18n-js';
 import { createContext, type ReactNode, useContext, useMemo } from 'react';
 
@@ -31,11 +31,10 @@ export const I18nProvider = <Locale extends string,>({
   setLocale,
 }: {
   children: ReactNode;
-  languages: Record<Locale, Record<string, string | undefined>>;
+  languages: Record<Locale, Record<string, string | undefined> | undefined>;
   locale?: Locale;
   setLocale: (locale?: Locale) => void;
 }) => {
-  const [system] = useLocales();
   _I18n = useMemo(
     () =>
       new I18n(languages, {
@@ -45,11 +44,7 @@ export const I18nProvider = <Locale extends string,>({
     [languages]
   );
   _locale =
-    locale ||
-    (system.languageCode === 'zh' && system.languageScriptCode === 'Hant'
-      ? 'zh-Hant'
-      : system.languageCode) ||
-    Object.keys(languages)[0];
+    locale || getLocales()[0].languageTag || Object.keys(languages)[0];
 
   if (!_locale) throw new Error('languages 不能为空');
 
