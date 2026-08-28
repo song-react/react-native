@@ -1,12 +1,6 @@
 import { useLocales, type Locale } from 'expo-localization';
 import { I18n, type TranslateOptions } from 'i18n-js';
-import {
-  createContext,
-  type ReactNode,
-  useCallback,
-  useContext,
-  useMemo,
-} from 'react';
+import { createContext, type ReactNode, useContext, useMemo } from 'react';
 
 export type Languages = Record<string, Record<string, unknown>>;
 export type Language<T extends Languages = Languages> = Extract<
@@ -14,14 +8,6 @@ export type Language<T extends Languages = Languages> = Extract<
   string
 >;
 export type Translate = (text: string, options?: TranslateOptions) => string;
-
-type I18nValue<T extends string = string> = {
-  language?: T;
-  locale: T;
-  languages: T[];
-  setLanguage: (language?: T) => void;
-  t: Translate;
-};
 
 let currentI18n: I18n | undefined;
 let currentLocale: string | undefined;
@@ -33,12 +19,18 @@ export const t: Translate = (text, options) =>
     ...options,
   }) ?? text;
 
-const I18nContext = createContext<I18nValue | null>(null);
+const I18nContext = createContext<{
+  language?: string;
+  locale: string;
+  languages: string[];
+  setLanguage: (language?: string) => void;
+  t: Translate;
+} | null>(null);
 
-export const useI18n = <T extends string = string>() => {
+export const useI18n = () => {
   const context = useContext(I18nContext);
   if (!context) throw new Error('缺少 I18nProvider');
-  return context as unknown as I18nValue<T>;
+  return context;
 };
 
 const systemLanguage = <T extends Languages>(
@@ -80,14 +72,11 @@ export const I18nProvider = <T extends Languages>({
 }) => {
   const [deviceLocale] = useLocales();
   const instance = useMemo(() => new I18n(languages), [languages]);
+  const selectedLanguage =
+    language && language in languages ? language : undefined;
   const locale =
-    (language && language in languages ? language : undefined) ??
+    selectedLanguage ??
     systemLanguage(languages, deviceLocale, defaultLanguage);
-  const translate = useCallback<Translate>(
-    (text, options) =>
-      instance.t(text, { defaultValue: text, locale, ...options }),
-    [instance, locale]
-  );
 
   currentI18n = instance;
   currentLocale = locale;
@@ -95,11 +84,16 @@ export const I18nProvider = <T extends Languages>({
   return (
     <I18nContext.Provider
       value={{
-        language,
+        language: selectedLanguage,
         locale,
         languages: Object.keys(languages),
-        setLanguage: value => setLanguage(value as Language<T> | undefined),
-        t: translate,
+        setLanguage: (value?: string) => {
+          if (value !== undefined && !(value in languages))
+            throw new Error(`不支持的语言: ${value}`);
+          setLanguage(value as Language<T> | undefined);
+        },
+        t: (text: string, options?: TranslateOptions) =>
+          instance.t(text, { defaultValue: text, locale, ...options }),
       }}
     >
       {children}
