@@ -4,14 +4,19 @@ import { experimental_createQueryPersister } from '@tanstack/query-persist-clien
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Paths } from 'expo-file-system';
 import { useEffect, type PropsWithChildren } from 'react';
+import { Platform } from 'react-native/index.js';
 import { createMMKV } from 'react-native-mmkv';
 
 let browserQueryClient: QueryClient | undefined;
-const mmkv = createMMKV({
-  id: 'tanstack-query-cache',
-  path: Paths.cache.uri.replace(/^file:\/\//, ''),
-  mode: 'multi-process',
-});
+const mmkv = createMMKV(
+  Platform.OS === 'web'
+    ? { id: 'tanstack-query-cache' }
+    : {
+        id: 'tanstack-query-cache',
+        path: Paths.cache.uri.replace(/^file:\/\//, ''),
+        mode: 'multi-process',
+      }
+);
 
 export const getQueryClient = () => {
   if (browserQueryClient) return browserQueryClient;
@@ -45,20 +50,25 @@ export const getQueryClient = () => {
         // 旧的 persister 持久化整个 QueryClient；当 gcTime 小于 maxAge 时，内存清理后的
         // 空缓存可能覆盖持久化数据。这里改用按 query 独立存取的 persister。
         persister: experimental_createQueryPersister({
-          storage: {
-            getItem: key => mmkv.getString(key) ?? null,
-            setItem: (key, value) => {
-              mmkv.set(key, value);
-            },
-            removeItem: key => {
-              mmkv.remove(key);
-            },
-            entries: () =>
-              mmkv
-                .getAllKeys()
-                .map(key => [key, mmkv.getString(key)])
-                .filter(([, value]) => value !== undefined) as [string, string][],
-          },
+          storage:
+            Platform.OS === 'web' && typeof window === 'undefined'
+              ? undefined
+              : {
+                  getItem: key => mmkv.getString(key) ?? null,
+                  setItem: (key, value) => {
+                    mmkv.set(key, value);
+                  },
+                  removeItem: key => {
+                    mmkv.remove(key);
+                  },
+                  entries: () =>
+                    mmkv.getAllKeys().flatMap(key => {
+                      const value = mmkv.getString(key);
+                      return value === undefined
+                        ? []
+                        : [[key, value] as [string, string]];
+                    }),
+                },
           maxAge: 7 * 24 * 60 * 60 * 1000,
           serialize: data =>
             JSON.stringify(data, (_key, value) =>
