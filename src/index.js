@@ -1,6 +1,17 @@
 const Native = require('react-native/index.js');
 
-Object.defineProperties(module.exports, Object.getOwnPropertyDescriptors(Native));
+const nativeDescriptors = Object.getOwnPropertyDescriptors(Native);
+for (const name of [
+  'Image',
+  'Modal',
+  'Pressable',
+  'ScrollView',
+  'Text',
+  'TextInput',
+  'View',
+])
+  delete nativeDescriptors[name];
+Object.defineProperties(module.exports, nativeDescriptors);
 
 const lazy = (name, load) =>
   Object.defineProperty(module.exports, name, {
