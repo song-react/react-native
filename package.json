@@ -18,7 +18,6 @@
     "@tanstack/react-query": "*",
     "expo": "*",
     "expo-blur": "*",
-    "expo-file-system": "*",
     "expo-image": "*",
     "expo-localization": "*",
     "i18n-js": "*",

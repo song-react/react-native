@@ -2,21 +2,11 @@
 
 import { experimental_createQueryPersister } from '@tanstack/query-persist-client-core';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Paths } from 'expo-file-system';
 import { useEffect, type PropsWithChildren } from 'react';
-import { Platform } from 'react-native/index.js';
 import { createMMKV } from 'react-native-mmkv';
 
 let browserQueryClient: QueryClient | undefined;
-const mmkv = createMMKV(
-  Platform.OS === 'web'
-    ? { id: 'tanstack-query-cache' }
-    : {
-        id: 'tanstack-query-cache',
-        path: Paths.cache.uri.replace(/^file:\/\//, ''),
-        mode: 'multi-process',
-      }
-);
+const mmkv = createMMKV({ id: 'tanstack-query-cache' });
 
 export const getQueryClient = () => {
   if (browserQueryClient) return browserQueryClient;
@@ -33,25 +23,12 @@ export const getQueryClient = () => {
       queries: {
         staleTime: __DEV__ ? 10 * 1000 : 1 * 60 * 1000,
         gcTime: 5 * 60 * 1000,
-        // refetchOnMount: true,
-        // refetchOnWindowFocus: true,
-        // refetchOnReconnect: true,
-        // refetchInterval: false,
-        // refetchIntervalInBackground: false,
-        // enabled: true,
-        // select: data => data,
-        // placeholderData: {},
-        // initialData: undefined,
         retry: false,
-        // retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
-        // structuralSharing: true,
-        // networkMode: 'always',
-        // experimental_prefetchInRender: true,
         // 旧的 persister 持久化整个 QueryClient；当 gcTime 小于 maxAge 时，内存清理后的
         // 空缓存可能覆盖持久化数据。这里改用按 query 独立存取的 persister。
         persister: experimental_createQueryPersister({
           storage:
-            Platform.OS === 'web' && typeof window === 'undefined'
+            typeof window === 'undefined'
               ? undefined
               : {
                   getItem: key => mmkv.getString(key) ?? null,
