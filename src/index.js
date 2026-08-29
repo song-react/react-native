@@ -5,7 +5,6 @@ for (const name of [
   'Image',
   'Modal',
   'Pressable',
-  'ScrollView',
   'Text',
   'TextInput',
   'View',
@@ -32,7 +31,6 @@ lazy('FlashList', () => require('@song-react/flash-list').FlashList);
 lazy('Image', () => require('./components/Image').Image);
 lazy('Modal', () => require('./components/Modal').Modal);
 lazy('Pressable', () => require('./components/Pressable').Pressable);
-lazy('ScrollView', () => require('./components/ScrollView').ScrollView);
 lazy('Text', () => require('./components/Text').Text);
 lazy('TextInput', () => require('./components/TextInput').TextInput);
 lazy('View', () => require('./components/View').View);

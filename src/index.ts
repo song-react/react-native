@@ -8,7 +8,6 @@ export { Image } from './components/Image';
 export type { ImageProps as EnhancedImageProps } from './components/Image';
 export { Modal } from './components/Modal';
 export { Pressable } from './components/Pressable';
-export { ScrollView } from './components/ScrollView';
 export { Text } from './components/Text';
 export { TextInput } from './components/TextInput';
 export { View } from './components/View';

@@ -179,7 +179,6 @@ const ImageImp = (
   const remoteProps = remoteKeys.length
     ? {
         cachePolicy: 'memory-disk' as const,
-        priority: 'normal' as const,
         recyclingKey: remoteKeys.join('\u0001'),
       }
     : undefined;

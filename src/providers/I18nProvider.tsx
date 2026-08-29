@@ -75,12 +75,7 @@ export const I18nProvider = ({
             throw new Error(`不支持的语言: ${value}`);
           setLocale(value);
         },
-        t: (text: TranslationKey, options?: TranslateOptions) =>
-          _I18n?.t(text, {
-            defaultValue: text,
-            locale: _locale,
-            ...options,
-          }) ?? text,
+        t,
       }}
     >
       {children}
