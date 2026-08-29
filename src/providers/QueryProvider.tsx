@@ -7,26 +7,15 @@ import { useEffect, type PropsWithChildren } from 'react';
 import { createMMKV } from 'react-native-mmkv';
 
 let browserQueryClient: QueryClient | undefined;
-let queryStorage: ReturnType<typeof createMMKV> | undefined;
-
-const getQueryStorage = () => {
-  if (queryStorage) return queryStorage;
-  queryStorage = createMMKV({
-    id: 'tanstack-query-cache',
-    path: Paths.cache.uri.replace(/^file:\/\//, ''),
-    mode: 'multi-process',
-  });
-  if (queryStorage.getString('version') !== '2') {
-    queryStorage.clearAll();
-    queryStorage.set('version', '2');
-  }
-  return queryStorage;
-};
+const mmkv = createMMKV({
+  id: 'tanstack-query-cache',
+  path: Paths.cache.uri.replace(/^file:\/\//, ''),
+  mode: 'multi-process',
+});
 
 export const getQueryClient = () => {
   if (browserQueryClient) return browserQueryClient;
 
-  const mmkv = getQueryStorage();
   const queryClient = new QueryClient({
     // 时间线：
     // t=0:      首次请求 → queryFn → 数据存入内存和 MMKV
@@ -68,16 +57,9 @@ export const getQueryClient = () => {
               mmkv
                 .getAllKeys()
                 .map(key => [key, mmkv.getString(key)])
-                .filter((entry): entry is [string, string] =>
-                  Boolean(entry[1])
-                ),
+                .filter(([, value]) => value !== undefined) as [string, string][],
           },
           maxAge: 7 * 24 * 60 * 60 * 1000,
-          // 登录态数据只留在内存；确认与账号无关的查询按需显式持久化。
-          filters: {
-            predicate: query => query.meta?.persist === true,
-          },
-          // JSON 默认不支持 BigInt，持久化时添加前缀，读取时恢复原类型。
           serialize: data =>
             JSON.stringify(data, (_key, value) =>
               typeof value === 'bigint'
@@ -101,11 +83,6 @@ export const getQueryClient = () => {
   }
   // Server 每次创建新实例，避免请求之间共享缓存。
   return queryClient;
-};
-
-export const clearQueryCache = () => {
-  getQueryClient().clear();
-  getQueryStorage().clearAll();
 };
 
 export const QueryProvider = ({
