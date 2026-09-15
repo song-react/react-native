@@ -5,13 +5,7 @@ React Native 的透明增强入口：完整导出原生能力，并以无业务�
 组件不缩放设计尺寸，只提供根属性透传、默认样式与外部样式合并；颜色和具体尺寸由业务工程覆盖。
 
 ```tsx
-import {
-  FlashList,
-  Pressable,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { FlashList, Pressable, Text, TextInput, View } from 'react-native';
 
 <View style={{ gap: 12 }}>
   <Text style={{ color: '#252E3A' }}>金额</Text>
@@ -49,11 +43,7 @@ Expo 工程在 `tsconfig.json` 中将原生入口指向本包；Expo Metro 会�
 `zh-Hant`），第一项作为系统语言不受支持时的兜底，以及由宿主保存的语言状态：
 
 ```tsx
-<I18nProvider
-  languages={languages}
-  locale={locale}
-  setLocale={setLocale}
->
+<I18nProvider languages={languages} locale={locale} setLocale={setLocale}>
   {children}
 </I18nProvider>
 ```
@@ -80,3 +70,7 @@ declare global {
 过期，5 分钟回收内存，关闭自动重试，并使用 MMKV 按 query 独立持久化 7 天。需要在
 React 组件外操作缓存时使用同包导出的 `getQueryClient()`。可通过 `onQuery` 和
 `onMutation` 分别接收全局查询、操作错误，由宿主决定日志、线路切换等业务处理。
+
+退出登录或切换账号时调用 `clearQueryClient()`，同时清除查询、mutation 和磁盘缓存。
+清理前未完成的请求及排队的持久化任务不会写回旧缓存；当前 `QueryClient` 实例继续复用。
+页面内的表单、弹窗等本地状态由宿主通过会话边界重置。

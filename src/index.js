@@ -1,14 +1,7 @@
 const Native = require('react-native/index.js');
 
 const nativeDescriptors = Object.getOwnPropertyDescriptors(Native);
-for (const name of [
-  'Image',
-  'Modal',
-  'Pressable',
-  'Text',
-  'TextInput',
-  'View',
-])
+for (const name of ['Image', 'Modal', 'Pressable', 'Text', 'TextInput', 'View'])
   delete nativeDescriptors[name];
 Object.defineProperties(module.exports, nativeDescriptors);
 
@@ -39,6 +32,12 @@ lazy('I18nProvider', () => require('./providers/I18nProvider').I18nProvider);
 lazy('useI18n', () => require('./providers/I18nProvider').useI18n);
 lazy('t', () => require('./providers/I18nProvider').t);
 lazy('QueryProvider', () => require('./providers/QueryProvider').QueryProvider);
-lazy('getQueryClient', () =>
-  require('./providers/QueryProvider').getQueryClient
+lazy(
+  'getQueryClient',
+  () => require('./providers/QueryProvider').getQueryClient
+);
+
+lazy(
+  'clearQueryClient',
+  () => require('./providers/QueryProvider').clearQueryClient
 );

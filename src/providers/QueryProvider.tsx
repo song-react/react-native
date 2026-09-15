@@ -13,6 +13,39 @@ const mmkv = createMMKV({
   mode: 'multi-process',
 });
 
+let _cacheVersion = 0;
+const _createPersister = () => {
+  const _version = _cacheVersion;
+  return experimental_createQueryPersister({
+    storage: {
+      getItem: key =>
+        _version === _cacheVersion ? (mmkv.getString(key) ?? null) : null,
+      setItem: (key, value) => {
+        if (_version === _cacheVersion) mmkv.set(key, value);
+      },
+      removeItem: key => {
+        if (_version === _cacheVersion) mmkv.remove(key);
+      },
+      entries: () =>
+        mmkv.getAllKeys().flatMap(key => {
+          const value = mmkv.getString(key);
+          return value === undefined ? [] : [[key, value] as [string, string]];
+        }),
+    },
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    serialize: data =>
+      JSON.stringify(data, (_key, value) =>
+        typeof value === 'bigint' ? `__bigint__${value.toString()}` : value
+      ),
+    deserialize: data =>
+      JSON.parse(data, (_key, value) =>
+        typeof value === 'string' && value.startsWith('__bigint__')
+          ? BigInt(value.slice(10))
+          : value
+      ),
+  }).persisterFn;
+};
+
 export const getQueryClient = () => {
   if (browserQueryClient) return browserQueryClient;
 
@@ -31,37 +64,7 @@ export const getQueryClient = () => {
         retry: false,
         // 旧的 persister 持久化整个 QueryClient；当 gcTime 小于 maxAge 时，内存清理后的
         // 空缓存可能覆盖持久化数据。这里改用按 query 独立存取的 persister。
-        persister: experimental_createQueryPersister({
-          storage: {
-            getItem: key => mmkv.getString(key) ?? null,
-            setItem: (key, value) => {
-              mmkv.set(key, value);
-            },
-            removeItem: key => {
-              mmkv.remove(key);
-            },
-            entries: () =>
-              mmkv.getAllKeys().flatMap(key => {
-                const value = mmkv.getString(key);
-                return value === undefined
-                  ? []
-                  : [[key, value] as [string, string]];
-              }),
-          },
-          maxAge: 7 * 24 * 60 * 60 * 1000,
-          serialize: data =>
-            JSON.stringify(data, (_key, value) =>
-              typeof value === 'bigint'
-                ? `__bigint__${value.toString()}`
-                : value
-            ),
-          deserialize: data =>
-            JSON.parse(data, (_key, value) =>
-              typeof value === 'string' && value.startsWith('__bigint__')
-                ? BigInt(value.slice(10))
-                : value
-            ),
-        }).persisterFn,
+        persister: _createPersister(),
       },
     },
   });
@@ -72,6 +75,19 @@ export const getQueryClient = () => {
   }
   // Server 每次创建新实例，避免请求之间共享缓存。
   return queryClient;
+};
+
+/** 清除查询、mutation 与磁盘缓存，阻止清理前的请求重新写入旧数据。 */
+export const clearQueryClient = () => {
+  _cacheVersion++;
+  const client = getQueryClient();
+  client.clear();
+  mmkv.clearAll();
+  const options = client.getDefaultOptions();
+  client.setDefaultOptions({
+    ...options,
+    queries: { ...options.queries, persister: _createPersister() },
+  });
 };
 
 export const QueryProvider = ({
