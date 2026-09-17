@@ -65,7 +65,7 @@ mock.module('react-native/index.js', () => ({
 }));
 mock.module('expo-image', () => ({ Image: _expoImage }));
 mock.module('expo-blur', () => ({ BlurView: 'blur-view' }));
-const { configureColors, useColors } = await import('../src/hooks/use-colors');
+const { useColors } = await import('../src/hooks/use-colors');
 const { useScreen } = await import('../src/hooks/use-screen');
 const { View } = await import('../src/components/View');
 const { ScrollView } = await import('../src/components/ScrollView');
@@ -79,7 +79,7 @@ beforeEach(() => {
   _height = 874;
   _width = 375;
   _scheme = 'light';
-  configureColors({ light: _light, dark: _dark });
+  useColors.set({ light: _light, dark: _dark });
   _effect = undefined;
   _animations.length = 0;
   _opacity.setValue.mockClear();
@@ -282,7 +282,7 @@ test('不依赖Provider，原生主题变化后直接选择已配置色板', () 
 });
 
 test('缺少深色色板时回退浅色，临时颜色对仍跟随原生主题', () => {
-  configureColors({ light: _light });
+  useColors.set({ light: _light });
   _scheme = 'dark';
   expect(useColors()).toBe(_light);
   expect(useColors([['white', 'black']])).toEqual(['black']);

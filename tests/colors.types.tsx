@@ -1,11 +1,5 @@
 import type { ComponentProps } from 'react';
-import {
-  configureColors,
-  ScrollView,
-  TextInput,
-  useColors,
-  type BaseColors,
-} from '../src';
+import { ScrollView, TextInput, useColors, type BaseColors } from '../src';
 
 const _colors = {
   light: {
@@ -49,10 +43,10 @@ export const useRegisteredColors = () => {
   // @ts-expect-error 不接收额外表单子节点。
   const _children: ComponentProps<typeof TextInput> = { children: '描述' };
   // @ts-expect-error 入口配置必须与注册色板一致。
-  configureColors({ light: {} });
+  useColors.set({ light: {} });
   return { _primary, _gradient, _incomplete, _input, _children };
 };
 
-configureColors(_colors);
+useColors.set(_colors);
 
 export const verifyScrollRef = (_ref: ScrollView) => _ref.scrollTo({ y: 100 });

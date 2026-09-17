@@ -27,11 +27,6 @@ type Palette = NonNullable<ColorsMap[keyof ColorsMap & keyof ThemeMap]>;
 
 let _colors: ThemeMap | undefined;
 
-/** 在应用入口、渲染组件前配置一次色板；主题切换使用原生 Appearance。 */
-export const configureColors = (colors: ColorsMap) => {
-  _colors = colors;
-};
-
 export function useColors(): Palette;
 export function useColors<
   T extends readonly (readonly [ColorValue, ColorValue])[],
@@ -41,6 +36,11 @@ export function useColors(
 ) {
   const _dark = useColorScheme() === 'dark';
   if (colors) return colors.map(_pair => _pair[_dark ? 1 : 0]);
-  if (!_colors) throw new Error('请先在应用入口调用 configureColors');
+  if (!_colors) throw new Error('请先在应用入口调用 useColors.set');
   return (_dark ? (_colors.dark ?? _colors.light) : _colors.light) as Palette;
 }
+
+/** 在应用入口、渲染组件前配置一次色板；主题切换使用原生 Appearance。 */
+useColors.set = (colors: ColorsMap) => {
+  _colors = colors;
+};

@@ -3,10 +3,10 @@
 React Native 的透明增强入口：完整导出原生能力，并以增强版 `Image`、
 `Modal`、`Pressable`、`ScrollView`、`Text`、`TextInput`、`View` 覆盖同名导出。
 基础组件沿用 `xz_rn` 的默认布局、字体和尺寸规则；业务颜色由入口配置，显式样式始终优先。
-在应用入口调用一次 `configureColors(colors)`，不需要额外 Provider。
+在应用入口调用一次 `useColors.set(colors)`，不需要额外 Provider。
 
 ```tsx
-import { configureColors, Text, TextInput, View } from 'react-native';
+import { useColors, Text, TextInput, View } from 'react-native';
 
 export const colors = {
   light: {
@@ -24,7 +24,7 @@ declare global {
   }
 }
 
-configureColors(colors);
+useColors.set(colors);
 
 export default () => (
   <View type='foreground'>
@@ -45,7 +45,7 @@ export default () => (
 | `empty`      | 留空区域和大背景，与前景对应 |
 | `fill`       | 文字、图标等内容填充色       |
 
-`configureColors` 在模块初始化、渲染界面前调用，用于登记静态色板；主题状态完全使用
+`useColors.set` 在模块初始化、渲染界面前调用，用于登记静态色板，调用本身不触发界面重渲染；主题状态完全使用
 React Native 的 `useColorScheme()`／`Appearance`，不增加 Context 或独立主题状态。
 系统变化会更新各处 `useColors()`；应用内切换使用 `Appearance.setColorScheme('dark')`
 或 `'light'`，恢复跟随系统使用 `'unspecified'`。参见
@@ -54,7 +54,7 @@ React Native 的 `useColorScheme()`／`Appearance`，不增加 Context 或独立
 缺少 `dark` 时色板回退到 `light`；未知原生主题也使用浅色。各主题业务字段宜保持一致，
 `useColors()` 返回主题色板的联合类型，避免误用某一主题没有的字段。
 也支持 xz 的临时颜色对：`useColors([['white', 'black']] as const)`，直接按原生主题选择，
-不依赖色板配置。之前的 `ColorsProvider` 已移除，入口改用 `configureColors` 即可。
+不依赖色板配置。之前的 `ColorsProvider` 已移除，入口改用 `useColors.set` 即可。
 
 `useScreen()` 返回当前 `width`、`height`、`landscape`、`fix(size)` 和断点状态。
 `fix(size) = size × (width / 375)^1.3`，随窗口尺寸变化更新；断点依次为
