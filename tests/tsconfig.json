@@ -9,5 +9,5 @@
     "moduleResolution": "Bundler",
     "allowSyntheticDefaultImports": true
   },
-  "files": ["colors.types.tsx"]
+  "files": ["colors.types.tsx", "query.types.tsx"]
 }

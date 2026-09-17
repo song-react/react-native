@@ -1,118 +1,59 @@
 'use client';
 
-import { experimental_createQueryPersister } from '@tanstack/query-persist-client-core';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Paths } from 'expo-file-system';
-import { useEffect, type PropsWithChildren } from 'react';
-import { createMMKV } from 'react-native-mmkv';
-
-let browserQueryClient: QueryClient | undefined;
-const mmkv = createMMKV({
-  id: 'tanstack-query-cache',
-  path: Paths.cache.uri.replace(/^file:\/\//, ''),
-  mode: 'multi-process',
-});
-
-let _cacheVersion = 0;
-const _createPersister = () => {
-  const _version = _cacheVersion;
-  return experimental_createQueryPersister({
-    storage: {
-      getItem: key =>
-        _version === _cacheVersion ? (mmkv.getString(key) ?? null) : null,
-      setItem: (key, value) => {
-        if (_version === _cacheVersion) mmkv.set(key, value);
-      },
-      removeItem: key => {
-        if (_version === _cacheVersion) mmkv.remove(key);
-      },
-      entries: () =>
-        mmkv.getAllKeys().flatMap(key => {
-          const value = mmkv.getString(key);
-          return value === undefined ? [] : [[key, value] as [string, string]];
-        }),
-    },
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  }).persisterFn;
-};
-
-export const getQueryClient = () => {
-  if (browserQueryClient) return browserQueryClient;
-
-  const queryClient = new QueryClient({
-    // 时间线：
-    // t=0:      首次请求 → queryFn → 数据存入内存和 MMKV
-    // t=1min:   数据变 stale，但仍在内存
-    // t=1min+1s: 用户访问 → 后台 refetch，并立即返回旧数据
-    // t=5min:   用户离开页面 → gcTime 到期 → 内存清除
-    // t=6min:   用户返回 → 从 MMKV 恢复 → 因数据已 stale 而 refetch
-    // t=7天:    MMKV 缓存过期 → 下次访问执行 queryFn
-    defaultOptions: {
-      queries: {
-        staleTime: __DEV__ ? 10 * 1000 : 1 * 60 * 1000,
-        gcTime: 5 * 60 * 1000,
-        retry: false,
-        // 旧的 persister 持久化整个 QueryClient；当 gcTime 小于 maxAge 时，内存清理后的
-        // 空缓存可能覆盖持久化数据。这里改用按 query 独立存取的 persister。
-        persister: _createPersister(),
-      },
-    },
-  });
-
-  if (typeof window !== 'undefined') {
-    // Browser/React Native 复用同一个实例，避免初次渲染挂起时重新创建 QueryClient。
-    browserQueryClient = queryClient;
-  }
-  // Server 每次创建新实例，避免请求之间共享缓存。
-  return queryClient;
-};
-
-/** 清除查询、mutation 与磁盘缓存，阻止清理前的请求重新写入旧数据。 */
-export const clearQueryClient = () => {
-  _cacheVersion++;
-  const client = getQueryClient();
-  client.clear();
-  mmkv.clearAll();
-  const options = client.getDefaultOptions();
-  client.setDefaultOptions({
-    ...options,
-    queries: { ...options.queries, persister: _createPersister() },
-  });
-};
+import {
+  QueryClient,
+  QueryClientProvider,
+  type MutationCacheNotifyEvent,
+  type QueryCacheNotifyEvent,
+  type QueryClientConfig,
+} from '@tanstack/react-query';
+import { useEffect, useState, type PropsWithChildren } from 'react';
 
 export const QueryProvider = ({
   children,
   onQuery,
   onMutation,
-}: PropsWithChildren<{
-  onQuery?: (error: unknown) => void;
-  onMutation?: (error: unknown) => void;
-}>) => {
+  ...config
+}: PropsWithChildren<
+  QueryClientConfig & {
+    onQuery?: (event: QueryCacheNotifyEvent, client: QueryClient) => void;
+    onMutation?: (event: MutationCacheNotifyEvent, client: QueryClient) => void;
+  }
+>) => {
+  const [client] = useState(
+    () =>
+      new QueryClient({
+        ...config,
+        defaultOptions: {
+          ...config.defaultOptions,
+          queries: {
+            staleTime: __DEV__ ? 10 * 1000 : 60 * 1000,
+            gcTime: 5 * 60 * 1000,
+            retry: false,
+            ...config.defaultOptions?.queries,
+          },
+        },
+      })
+  );
+
   useEffect(() => {
-    const client = getQueryClient();
-    const unsubQuery = onQuery
+    const _query = onQuery
       ? client.getQueryCache().subscribe(event => {
-          if (event.type === 'updated' && event.action.type === 'error') {
-            onQuery(event.action.error);
-          }
+          if (event.type === 'updated' && event.action.type === 'error')
+            onQuery(event, client);
         })
       : undefined;
-    const unsubMutation = onMutation
+    const _mutation = onMutation
       ? client.getMutationCache().subscribe(event => {
-          if (event.type === 'updated' && event.action.type === 'error') {
-            onMutation(event.action.error);
-          }
+          if (event.type === 'updated' && event.action.type === 'error')
+            onMutation(event, client);
         })
       : undefined;
     return () => {
-      unsubQuery?.();
-      unsubMutation?.();
+      _query?.();
+      _mutation?.();
     };
-  }, [onMutation, onQuery]);
+  }, [client, onMutation, onQuery]);
 
-  return (
-    <QueryClientProvider client={getQueryClient()}>
-      {children}
-    </QueryClientProvider>
-  );
+  return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 };

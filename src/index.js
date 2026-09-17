@@ -32,15 +32,5 @@ lazy('I18nProvider', () => require('./providers/I18nProvider').I18nProvider);
 lazy('useI18n', () => require('./providers/I18nProvider').useI18n);
 lazy('t', () => require('./providers/I18nProvider').t);
 lazy('QueryProvider', () => require('./providers/QueryProvider').QueryProvider);
-lazy(
-  'getQueryClient',
-  () => require('./providers/QueryProvider').getQueryClient
-);
-
-lazy(
-  'clearQueryClient',
-  () => require('./providers/QueryProvider').clearQueryClient
-);
-
 lazy('useColors', () => require('./hooks/use-colors').useColors);
 lazy('useScreen', () => require('./hooks/use-screen').useScreen);

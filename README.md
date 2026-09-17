@@ -126,12 +126,36 @@ declare global {
 }
 ```
 
-`QueryProvider` 内置与 `xz_rn` 一致的 `QueryClient`：开发环境 10 秒、生产环境 1 分钟
-过期，5 分钟回收内存，关闭自动重试，并使用 MMKV 按 query 独立持久化 7 天。
-持久化直接使用默认 JSON 序列化，不转换 BigInt，也不需要宿主配置存储。需要在
-React 组件外操作缓存时使用同包导出的 `getQueryClient()`。可通过 `onQuery` 和
-`onMutation` 分别接收全局查询、操作错误，由宿主决定日志、线路切换等业务处理。
+`QueryProvider` 直接接收官方 `QueryClientConfig`（`defaultOptions`、`queryCache`、
+`mutationCache`），在内部创建独立的 `QueryClient`，同一次挂载中的重渲染复用该实例。
+默认开发环境 10 秒、生产环境 1 分钟 staleTime，5 分钟 gcTime，关闭自动重试；
+不启用持久化，也不依赖 MMKV、Expo FileSystem 或 query-persist-client-core。
+业务配置覆盖对应默认项，`defaultOptions.queries` 按字段合并，不丢失其它默认值。
+构造配置仅在初始化时生效；运行中需要修改默认值可使用官方 `client.setDefaultOptions()`。
+重新挂载（例如修改 `key`）会创建新的实例；使用 Suspense 时应将其边界放在 Provider 内部。
 
-退出登录或切换账号时调用 `clearQueryClient()`，同时清除查询、mutation 和磁盘缓存。
-清理前未完成的请求及排队的持久化任务不会写回旧缓存；当前 `QueryClient` 实例继续复用。
-页面内的表单、弹窗等本地状态由宿主通过会话边界重置。
+```tsx
+<QueryProvider
+  defaultOptions={{
+    queries: { staleTime: 30_000, persister: createQueryPersister() },
+    mutations: { retry: false },
+  }}
+  onQuery={(event, client) => {
+    if (event.type === 'updated' && event.action.type === 'error') {
+      handleQueryError(client, event.action.error);
+    }
+  }}>
+  {children}
+</QueryProvider>
+```
+
+`createQueryPersister` 和 `handleQueryError` 由宿主实现。未传 `persister` 时只有内存缓存。
+`onQuery`／`onMutation` 继续只在对应缓存发生错误时调用，第一参数为官方完整事件，
+第二参数为该 Provider 的 client；回调变化或组件卸载时取消旧订阅。
+
+组件和自定义 Hook 使用 `@tanstack/react-query` 的 `useQueryClient()` 获取最近的实例。
+普通业务方法显式接收 `QueryClient` 参数，由调用方传入。不再导出全局 `getQueryClient`
+或 `clearQueryClient`，也不另外维护一个全局客户端。
+
+`client.clear()` 只清理该实例的查询和 mutation 内存缓存。宿主启用持久化后自行负责
+退出登录时的磁盘清理及旧请求防回写；页面内表单、弹窗等本地状态仍由宿主会话边界重置。
