@@ -13,7 +13,7 @@ export type TextInputProps = Omit<_TextInputProps, 'children'> & {
   suffix?: React.ReactNode;
 };
 
-const TextInputImp = (
+const _TextInputImp = function TextInputImp(
   {
     containerProps,
     prefix,
@@ -25,7 +25,7 @@ const TextInputImp = (
     ...props
   }: TextInputProps,
   ref: ForwardedRef<ComponentRef<typeof _TextInput>>
-) => {
+) {
   const colors = useColors();
   const { fix } = useScreen();
   const borderRadius = fix(8);
@@ -79,4 +79,4 @@ const TextInputImp = (
   );
 };
 
-export const TextInput = forwardRef(TextInputImp);
+export const TextInput = forwardRef(_TextInputImp);

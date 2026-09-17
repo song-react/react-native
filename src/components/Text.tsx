@@ -125,10 +125,10 @@ export type TextProps = _TextProps & {
   };
 };
 
-const TextImp = (
+const _TextImp = function TextImp(
   { children, style, ctx = {}, ...rest }: TextProps,
   ref: ForwardedRef<ComponentRef<typeof _Text>>
-) => {
+) {
   const colors = useColors();
   const { fix } = useScreen();
   return (
@@ -146,4 +146,4 @@ const TextImp = (
   );
 };
 
-export const Text = forwardRef(TextImp);
+export const Text = forwardRef(_TextImp);

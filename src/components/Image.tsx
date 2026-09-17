@@ -12,10 +12,10 @@ export type ImageProps = Omit<_ImageProps, 'source' | 'style'> &
     style?: ImageStyle;
   };
 
-const ImageImp = (
+const _ImageImp = function ImageImp(
   { source: Source, ...props }: ImageProps,
   ref: ForwardedRef<ComponentRef<typeof _Image>>
-) => {
+) {
   const [aspectRatio, setAspectRatio] = useState<undefined | number>(undefined);
 
   const { style, onLoad, ...rest } = props;
@@ -60,7 +60,7 @@ const ImageImp = (
   );
 };
 
-export const Image = forwardRef(ImageImp) as React.ForwardRefExoticComponent<
+export const Image = forwardRef(_ImageImp) as React.ForwardRefExoticComponent<
   React.PropsWithoutRef<ImageProps> &
     React.RefAttributes<ComponentRef<typeof _Image>>
 > & {

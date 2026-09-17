@@ -1,5 +1,5 @@
 import { BlurView, type BlurViewProps } from 'expo-blur';
-import { forwardRef, type ComponentRef } from 'react';
+import { forwardRef, type ComponentRef, type ForwardedRef } from 'react';
 import {
   View as _View,
   type ViewProps as _ViewProps,
@@ -13,21 +13,24 @@ export type ViewProps = (_ViewProps | BlurViewProps) & {
   type?: 'default' | 'background' | 'foreground';
 };
 
-export const View = forwardRef<ComponentRef<typeof _View>, ViewProps>(
-  ({ type = 'default', style, ...props }, ref) => {
-    const colors = useColors();
-    const Component = 'intensity' in props ? BlurView : _View;
-    return (
-      <Component
-        ref={ref}
-        style={[
-          {
-            backgroundColor: type === 'default' ? 'transparent' : colors[type],
-          },
-          style,
-        ]}
-        {...props}
-      />
-    );
-  }
-);
+const _ViewImp = function ViewImp(
+  { type = 'default', style, ...props }: ViewProps,
+  ref: ForwardedRef<ComponentRef<typeof _View>>
+) {
+  const colors = useColors();
+  const Component = 'intensity' in props ? BlurView : _View;
+  return (
+    <Component
+      ref={ref}
+      style={[
+        {
+          backgroundColor: type === 'default' ? 'transparent' : colors[type],
+        },
+        style,
+      ]}
+      {...props}
+    />
+  );
+};
+
+export const View = forwardRef(_ViewImp);

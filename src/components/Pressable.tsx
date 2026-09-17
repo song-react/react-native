@@ -6,7 +6,7 @@ import {
 
 export type PressableProps = _PressableProps;
 
-const PressableImp = (
+const _PressableImp = (
   { style, disabled, ...props }: PressableProps,
   ref: ForwardedRef<ComponentRef<typeof _Pressable>>
 ) => (
@@ -22,4 +22,4 @@ const PressableImp = (
   />
 );
 
-export const Pressable = forwardRef(PressableImp);
+export const Pressable = forwardRef(_PressableImp);

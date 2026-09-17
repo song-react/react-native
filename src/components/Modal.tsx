@@ -16,7 +16,7 @@ export type ModalProps = Omit<_ModalProps, 'backdropColor'> & {
   containerStyle?: StyleProp<ViewStyle>;
 };
 
-const ModalImp = (
+const _ModalImp = function ModalImp(
   {
     containerStyle,
     children,
@@ -26,7 +26,7 @@ const ModalImp = (
     ...props
   }: ModalProps,
   ref: ForwardedRef<ComponentRef<typeof _Modal>>
-) => {
+) {
   const colors = useColors();
   const { height, fix } = useScreen();
   const opacity = useAnimatedValue(0);
@@ -117,4 +117,4 @@ const ModalImp = (
   );
 };
 
-export const Modal = forwardRef(ModalImp);
+export const Modal = forwardRef(_ModalImp);
