@@ -5,8 +5,8 @@ import {
   StyleProp,
   ViewStyle,
 } from 'react-native/index.js';
+import { useColors } from '../hooks/use-colors';
 import { useScreen } from '../hooks/use-screen';
-import { useColors } from '../providers/ColorsProvider';
 import { View, ViewProps } from './View';
 
 export type TextInputProps = Omit<_TextInputProps, 'children'> & {

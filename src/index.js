@@ -51,9 +51,6 @@ lazy(
 );
 
 lazy('ScrollView', () => require('./components/ScrollView').ScrollView);
-lazy(
-  'ColorsProvider',
-  () => require('./providers/ColorsProvider').ColorsProvider
-);
-lazy('useColors', () => require('./providers/ColorsProvider').useColors);
+lazy('configureColors', () => require('./hooks/use-colors').configureColors);
+lazy('useColors', () => require('./hooks/use-colors').useColors);
 lazy('useScreen', () => require('./hooks/use-screen').useScreen);

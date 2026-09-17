@@ -6,7 +6,7 @@ import {
   type ViewStyle as _ViewStyle,
 } from 'react-native/index.js';
 
-import { useColors } from '../providers/ColorsProvider';
+import { useColors } from '../hooks/use-colors';
 
 export type ViewStyle = _ViewStyle;
 export type ViewProps = (_ViewProps | BlurViewProps) & {

@@ -3,7 +3,7 @@ import {
   ScrollView as _ScrollView,
   type ScrollViewProps as _ScrollViewProps,
 } from 'react-native/index.js';
-import { useColors } from '../providers/ColorsProvider';
+import { useColors } from '../hooks/use-colors';
 
 export type ScrollViewProps = _ScrollViewProps & {
   type?: 'default' | 'background' | 'foreground';

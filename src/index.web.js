@@ -11,5 +11,5 @@ export { View } from './components/View';
 export * from './providers/I18nProvider';
 export * from './providers/QueryProvider';
 
+export * from './hooks/use-colors';
 export { useScreen } from './hooks/use-screen';
-export * from './providers/ColorsProvider';

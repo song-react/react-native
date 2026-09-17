@@ -7,8 +7,8 @@ import {
   type TextProps as _TextProps,
 } from 'react-native/index.js';
 
+import { useColors } from '../hooks/use-colors';
 import { useScreen } from '../hooks/use-screen';
-import { useColors } from '../providers/ColorsProvider';
 
 const CUSTOM_TEST_REGEX = /\[[^\]]+\]/;
 const CUSTOM_SPLIT_REGEX = /(\[[^\]]+\])/g;

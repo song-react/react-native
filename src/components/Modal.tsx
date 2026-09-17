@@ -7,8 +7,8 @@ import {
   ViewStyle,
   type ModalProps as _ModalProps,
 } from 'react-native/index.js';
+import { useColors } from '../hooks/use-colors';
 import { useScreen } from '../hooks/use-screen';
-import { useColors } from '../providers/ColorsProvider';
 import { Pressable } from './Pressable';
 import { View } from './View';
 

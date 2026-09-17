@@ -5,7 +5,6 @@ import * as React from 'react';
 let _state;
 let _height;
 let _width;
-let _theme;
 let _scheme;
 const _light = {
   background: '#eee',
@@ -33,7 +32,6 @@ const _expoImage = Object.assign(() => null, {
 });
 mock.module('react', () => ({
   ...React,
-  useContext: () => _theme,
   useState: () => [
     _state,
     _next => {
@@ -67,8 +65,7 @@ mock.module('react-native/index.js', () => ({
 }));
 mock.module('expo-image', () => ({ Image: _expoImage }));
 mock.module('expo-blur', () => ({ BlurView: 'blur-view' }));
-const { ColorsProvider, useColors } =
-  await import('../src/providers/ColorsProvider');
+const { configureColors, useColors } = await import('../src/hooks/use-colors');
 const { useScreen } = await import('../src/hooks/use-screen');
 const { View } = await import('../src/components/View');
 const { ScrollView } = await import('../src/components/ScrollView');
@@ -82,7 +79,7 @@ beforeEach(() => {
   _height = 874;
   _width = 375;
   _scheme = 'light';
-  _theme = { colors: _light, colorScheme: 'light' };
+  configureColors({ light: _light, dark: _dark });
   _effect = undefined;
   _animations.length = 0;
   _opacity.setValue.mockClear();
@@ -266,10 +263,9 @@ test('fade默认居中，遮罩取消动画不关闭，淡出完成才关闭', (
   expect(_opacity.stopAnimation).toHaveBeenCalledTimes(1);
 });
 
-test('颜色跟随系统，显式配置可覆盖，浅色配置回退保持一致', () => {
-  const _map = { light: _light, dark: _dark };
+test('不依赖Provider，原生主题变化后直接选择已配置色板', () => {
+  expect(useColors()).toBe(_light);
   _scheme = 'dark';
-  _theme = ColorsProvider({ colors: _map, children: null }).props.value;
   expect(useColors()).toBe(_dark);
   expect(
     useColors([
@@ -277,26 +273,24 @@ test('颜色跟随系统，显式配置可覆盖，浅色配置回退保持一�
       ['blue', 'cyan'],
     ])
   ).toEqual(['black', 'cyan']);
-  _theme = ColorsProvider({
-    colors: _map,
-    colorScheme: 'light',
-    children: null,
-  }).props.value;
+  _scheme = 'light';
   expect(useColors()).toBe(_light);
-  _theme = ColorsProvider({ colors: { light: _light }, children: null }).props
-    .value;
+  for (const _value of [null, 'unspecified']) {
+    _scheme = _value;
+    expect(useColors()).toBe(_light);
+  }
+});
+
+test('缺少深色色板时回退浅色，临时颜色对仍跟随原生主题', () => {
+  configureColors({ light: _light });
+  _scheme = 'dark';
   expect(useColors()).toBe(_light);
-  expect(useColors([['white', 'black']])).toEqual(['white']);
-  _theme = null;
-  expect(() => useColors()).toThrow('缺少 ColorsProvider');
+  expect(useColors([['white', 'black']])).toEqual(['black']);
 });
 
 test('切换主题后基础组件使用当前颜色，调用方样式仍优先', () => {
   for (const _palette of [_light, _dark]) {
-    _theme = {
-      colors: _palette,
-      colorScheme: _palette === _dark ? 'dark' : 'light',
-    };
+    _scheme = _palette === _dark ? 'dark' : 'light';
     expect(_flatten(Text.render({}, null).props.style).color).toBe(
       _palette.fill
     );

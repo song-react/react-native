@@ -1,4 +1,3 @@
-import { createContext, useContext, type ReactNode } from 'react';
 import { useColorScheme, type ColorValue } from 'react-native/index.js';
 
 export type BaseColors = {
@@ -26,10 +25,12 @@ type ColorsMap = SongReactNativeColors extends {
   : ThemeMap;
 type Palette = NonNullable<ColorsMap[keyof ColorsMap & keyof ThemeMap]>;
 
-const _ColorsContext = createContext<{
-  colors: BaseColors;
-  colorScheme: 'light' | 'dark';
-} | null>(null);
+let _colors: ThemeMap | undefined;
+
+/** 在应用入口、渲染组件前配置一次色板；主题切换使用原生 Appearance。 */
+export const configureColors = (colors: ColorsMap) => {
+  _colors = colors;
+};
 
 export function useColors(): Palette;
 export function useColors<
@@ -38,36 +39,8 @@ export function useColors<
 export function useColors(
   colors?: readonly (readonly [ColorValue, ColorValue])[]
 ) {
-  const _context = useContext(_ColorsContext);
-  if (!_context) throw new Error('缺少 ColorsProvider');
-  return colors
-    ? colors.map(_pair => _pair[_context.colorScheme === 'dark' ? 1 : 0])
-    : (_context.colors as Palette);
+  const _dark = useColorScheme() === 'dark';
+  if (colors) return colors.map(_pair => _pair[_dark ? 1 : 0]);
+  if (!_colors) throw new Error('请先在应用入口调用 configureColors');
+  return (_dark ? (_colors.dark ?? _colors.light) : _colors.light) as Palette;
 }
-
-export const ColorsProvider = ({
-  children,
-  colors,
-  colorScheme,
-}: {
-  children: ReactNode;
-  colors: ColorsMap;
-  /** 不指定或传null时跟随系统；没有深色配置时使用浅色。 */
-  colorScheme?: 'light' | 'dark' | null;
-}) => {
-  const _systemScheme = useColorScheme();
-  const _colors: ThemeMap = colors;
-  const _scheme =
-    (colorScheme ?? _systemScheme) === 'dark' && _colors.dark
-      ? 'dark'
-      : 'light';
-  return (
-    <_ColorsContext.Provider
-      value={{
-        colors: _scheme === 'dark' ? _colors.dark! : _colors.light,
-        colorScheme: _scheme,
-      }}>
-      {children}
-    </_ColorsContext.Provider>
-  );
-};
