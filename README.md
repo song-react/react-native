@@ -58,7 +58,9 @@ React Native 的 `useColorScheme()`／`Appearance`，不增加 Context 或独立
 不依赖色板配置。之前的 `ColorsProvider` 已移除，入口改用 `useColors.set` 即可。
 
 `useScreen()` 返回当前 `width`、`height`、`landscape`、`fix(size)` 和断点状态。
-`fix(size) = size × (width / 375)^1.3`，随窗口尺寸变化更新；断点依次为
+`useScreen.set(375)` 可在应用入口、渲染前配置尺寸基准；未配置时默认375，要求为正有限数值。
+`fix(size) = size × (width / 基准宽度)^1.3`，随窗口尺寸变化更新；设置基准不额外触发重渲染，
+也不改写真实窗口宽高和断点。断点依次为
 `xs=440`、`sm=667`、`md=774`、`lg=1133`、`xl=1280`、`xxl=1536`。
 组件默认字号、输入框间距和弹窗间距使用该缩放；调用方显式尺寸不二次缩放，页面整体宽度仍采用父子布局。
 

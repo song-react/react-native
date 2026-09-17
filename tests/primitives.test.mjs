@@ -86,6 +86,7 @@ beforeEach(() => {
   _state = undefined;
   _height = 874;
   _width = 375;
+  useScreen.set(375);
   _scheme = 'light';
   useColors.set({ light: _light, dark: _dark });
   _effect = undefined;
@@ -410,4 +411,23 @@ test('原生颜色对象保持透传，显式背景覆盖仍然优先', () => {
       ).props.style
     ).backgroundColor
   ).toBe('blue');
+});
+
+test('屏幕基准可在入口设置，窗口尺寸与断点不被改写', () => {
+  useScreen.set(390);
+  _width = 390;
+  expect(useScreen().fix(16)).toBe(16);
+  _width = 440;
+  expect(useScreen().fix(16)).toBeCloseTo(16 * Math.pow(440 / 390, 1.3));
+  expect(useScreen()).toMatchObject({
+    width: 440,
+    height: 874,
+    xs: true,
+    landscape: false,
+  });
+  for (const _invalid of [0, -1, NaN, Infinity])
+    expect(() => useScreen.set(_invalid)).toThrow(
+      '屏幕基准宽度必须是大于0的有限数值'
+    );
+  expect(useScreen().fix(16)).toBeCloseTo(16 * Math.pow(440 / 390, 1.3));
 });

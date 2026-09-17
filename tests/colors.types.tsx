@@ -1,5 +1,11 @@
 import type { ComponentProps } from 'react';
-import { ScrollView, TextInput, useColors, type BaseColors } from '../src';
+import {
+  ScrollView,
+  TextInput,
+  useColors,
+  useScreen,
+  type BaseColors,
+} from '../src';
 
 const _colors = {
   light: {
@@ -50,3 +56,7 @@ export const useRegisteredColors = () => {
 useColors.set(_colors);
 
 export const verifyScrollRef = (_ref: ScrollView) => _ref.scrollTo({ y: 100 });
+
+useScreen.set(390);
+// @ts-expect-error 屏幕基准使用数值，不能传字符串。
+useScreen.set('390');
