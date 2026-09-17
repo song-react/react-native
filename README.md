@@ -1,85 +1,12 @@
 # @song-react/react-native
 
-接入或修改前请阅读 [AGENTS.md：基本用法与开发约束](./AGENTS.md)。
+React Native 桥接库：扩展 `Image`、`Modal`、`Pressable`、`Text`、`TextInput`、`View`，
+导出 `FlashList`、主题／屏幕 Hook 和 Provider，其余原生 API 透传。
+接入与开发约束见 [AGENTS.md](./AGENTS.md)。
 
-React Native 的透明增强入口：完整导出原生能力，并以增强版 `Image`、
-`Modal`、`Pressable`、`Text`、`TextInput`、`View` 覆盖同名导出。
-`ScrollView` 直接透传 React Native 原生组件及类型。
-基础组件沿用 `xz_rn` 的默认布局、字体和尺寸规则；业务颜色由入口配置，显式样式始终优先。
-在应用入口调用一次 `useColors.set(colors)`，不需要额外 Provider。
+## 接入
 
-```tsx
-import { useColors, Text, TextInput, View } from 'react-native';
-
-export const colors = {
-  light: {
-    background: '#ECF0FA',
-    foreground: '#FFFFFF',
-    empty: '#F1F5FF',
-    fill: '#252E3A',
-    primary: '#0065FF',
-  },
-} as const;
-
-declare global {
-  interface SongReactNativeColors {
-    colors: typeof colors;
-  }
-}
-
-useColors.set(colors);
-
-export default () => (
-  <View type='foreground'>
-    <Text>金额</Text>
-    <TextInput placeholder='请输入金额' />
-  </View>
-);
-```
-
-颜色采用与 I18n 相同的“入口配置＋一次类型注册”：各处直接调用 `useColors()`，
-自动提示注册色板中的业务色和渐变对象，无需每次传泛型。`light` 必填、`dark` 可选，
-每套色板都必须含以下四个基本颜色（支持 React Native `ColorValue`）：
-
-| 色名         | 用途                         |
-| ------------ | ---------------------------- |
-| `background` | 背景、分割线、输入框背景     |
-| `foreground` | 模块、卡片等比背景突出的表面 |
-| `empty`      | 留空区域和大背景，与前景对应 |
-| `fill`       | 文字、图标等内容填充色       |
-
-`useColors.set` 在模块初始化、渲染界面前调用，用于登记静态色板，调用本身不触发界面重渲染；主题状态完全使用
-React Native 的 `useColorScheme()`／`Appearance`，不增加 Context 或独立主题状态。
-系统变化会更新各处 `useColors()`；应用内切换使用 `Appearance.setColorScheme('dark')`
-或 `'light'`，恢复跟随系统使用 `'unspecified'`。参见
-[RN Appearance](https://reactnative.dev/docs/0.86/appearance)。
-
-缺少 `dark` 时色板回退到 `light`；未知原生主题也使用浅色。各主题业务字段宜保持一致，
-`useColors()` 返回主题色板的联合类型，避免误用某一主题没有的字段。
-也支持 xz 的临时颜色对：`useColors([['white', 'black']] as const)`，直接按原生主题选择，
-不依赖色板配置。之前的 `ColorsProvider` 已移除，入口改用 `useColors.set` 即可。
-
-`useScreen()` 返回当前 `width`、`height`、`landscape`、`fix(size)` 和断点状态。
-`useScreen.set(375)` 可在应用入口、渲染前配置尺寸基准；未配置时默认375，要求为正有限数值。
-`fix(size) = size × (width / 基准宽度)^1.3`，随窗口尺寸变化更新；设置基准不额外触发重渲染，
-也不改写真实窗口宽高和断点。断点依次为
-`xs=440`、`sm=667`、`md=774`、`lg=1133`、`xl=1280`、`xxl=1536`。
-组件默认字号、输入框间距和弹窗间距使用该缩放；调用方显式尺寸不二次缩放，页面整体宽度仍采用父子布局。
-
-`View` 支持 `type='background'`／`'foreground'`，默认透明。
-`Text` 默认使用 `fill`、PingFang SC，并关闭系统字号缩放，保留链接／提及／自定义解析。
-`TextInput` 保留 `prefix`、`suffix`、`containerProps` 及原生事件／ref；
-不含标题、描述、错误提示或额外表单内容，交由业务表单组合。输入文字不会被组件二次写回。
-输入框禁用时使用 RN 的 `processColor` 解析普通颜色，将背景原有 alpha 乘以 `160/255`，
-支持 `#RGB`、`#RRGGBB`、带 alpha 的十六进制、`rgb/rgba`、`hsl/hsla`、`hwb`、命名色及透明色。
-文字及前后缀不随容器变淡，显式背景样式仍然优先。`PlatformColor` 等原生颜色对象保留原样透传，
-不在 JS 中修改其 alpha，也不强行转成字符串。
-`Modal` 沿用原生 `animationType`：`slide` 默认底部，`fade` 默认居中；遮罩高度为窗口两倍，
-向上延伸一个窗口高度，淡入和点击遮罩淡出均为 150ms，淡出完成后调用 `onRequestClose`。
-`Image` 保留 SVG 组件直传、位图加载后宽高比测量和缓存清理方法，根 `width`／`height` 进入位图布局。
-
-Expo 工程在 `tsconfig.json` 中将原生入口指向本包；Expo Metro 会读取同一别名，无需额外
-修改 `metro.config.js`：
+建议宿主在 `tsconfig.json` 合并路径配置，并确保运行时解析也指向本库：
 
 ```json
 {
@@ -92,21 +19,50 @@ Expo 工程在 `tsconfig.json` 中将原生入口指向本包；Expo Metro 会�
 }
 ```
 
-宿主统一使用 `import { xxx } from 'react-native'`，优先经本桥接工程解析。
-**不能以 `react-native/index.js`、上游同名包或本地复制件绕过中转层。**
-需要原生输入框时，从同一入口使用公开的 `NativeTextInput`。
-库内部的上游透传实现不属于宿主可采用的绕过方式，详见 [AGENTS.md](./AGENTS.md)。
+组件、Hook 和 Provider 统一从 `react-native` 导入。
 
-基础组件放在 `src/components/`，Provider 放在 `src/providers/`。导出与 `xz_rn`
-基础层对应的 `Image`、`Modal`、`Pressable`、`Text`、`TextInput`、`View`；
-不额外封装 Flex 布局组件。
+## 主题与尺寸
 
-同时直接导出固定为 2.3.2 的 `FlashList` 修正版。实际实现来自
-[`@song-react/flash-list`](https://github.com/song-react/flash-list)，无需宿主工程配置
-`patch-package`；`patches/@shopify+flash-list+2.3.2.patch` 仅保留为修正来源记录。
+应用入口、首次渲染前配置一次：
 
-`I18nProvider` 接收非空 `languages.json`，语言键使用语言代码（如 `zh`、`en`、
-`zh-Hant`），第一项作为系统语言不受支持时的兜底，以及由宿主保存的语言状态：
+```ts
+import { useColors, useScreen } from 'react-native';
+
+const colors = {
+  light: {
+    background: '#ECF0FA', // 背景、分割线、输入框背景
+    foreground: '#FFFFFF', // 模块、卡片
+    empty: '#F1F5FF', // 留空区域、大背景
+    fill: '#252E3A', // 文字、图标
+    primary: '#0065FF', // 自定义业务色
+  },
+} as const;
+
+declare global {
+  interface SongReactNativeColors {
+    colors: typeof colors;
+  }
+}
+
+useColors.set(colors);
+useScreen.set(375); // 默认375，可省略
+```
+
+`useColors()` 自动提示基础色和业务色，跟随 RN 原生主题，无需额外 Provider。
+`light` 必填，`dark` 可选；每套主题必须包含上述四个基础色，缺少深色主题时回退浅色。
+`useScreen()` 返回窗口尺寸、方向、断点和 `fix(size)` 缩放方法。
+两种 `set` 都用于初始化，不主动触发重渲染。
+
+组件常用扩展：
+
+- `View` 默认透明，支持 `type='background'`／`'foreground'`。
+- `TextInput` 支持 `prefix`、`suffix`；`containerProps.style` 控制容器，`style` 控制输入框。
+- `Modal` 的 `slide` 默认底部，`fade` 默认居中；遮罩为两倍窗口高度，支持淡入及点击遮罩淡出。
+- `Image` 支持 Expo Image 属性及 SVG 组件作为 `source`。
+
+## Provider
+
+`I18nProvider` 接收非空语言表和宿主管理的语言状态：
 
 ```tsx
 <I18nProvider languages={languages} locale={locale} setLocale={setLocale}>
@@ -114,17 +70,10 @@ Expo 工程在 `tsconfig.json` 中将原生入口指向本包；Expo Metro 会�
 </I18nProvider>
 ```
 
-组件内使用 `useI18n()` 获取当前生效的 `locale`、语言表键 `locales`、`setLocale` 和
-`t`；非 Hook 代码可直接使用全局 `t()`。传入 Provider 的 `locale` 为 `undefined` 时
-跟随系统语言；系统语言不在语言表内时使用第一项，调用 `setLocale(undefined)` 可恢复
-跟随系统。
-
-宿主增加一次类型注册后，`locale` 会限制为语言表一级 key，`t()` 的首参会限制为所有
-语言共同拥有的二级 key：
+组件内使用 `useI18n()`，普通方法使用 `t()`；`locale` 为 `undefined` 时采用系统语言，
+未匹配时回退语言表第一项。增加以下类型注册即可提示语言和翻译键：
 
 ```ts
-import languages from '@/assets/languages.json';
-
 declare global {
   interface SongReactNativeI18n {
     languages: typeof languages;
@@ -132,36 +81,15 @@ declare global {
 }
 ```
 
-`QueryProvider` 直接接收官方 `QueryClientConfig`（`defaultOptions`、`queryCache`、
-`mutationCache`），在内部创建独立的 `QueryClient`，同一次挂载中的重渲染复用该实例。
-默认开发环境 10 秒、生产环境 1 分钟 staleTime，5 分钟 gcTime，关闭自动重试；
-不启用持久化，也不依赖 MMKV、Expo FileSystem 或 query-persist-client-core。
-业务配置覆盖对应默认项，`defaultOptions.queries` 按字段合并，不丢失其它默认值。
-构造配置仅在初始化时生效；运行中需要修改默认值可使用官方 `client.setDefaultOptions()`。
-重新挂载（例如修改 `key`）会创建新的实例；使用 Suspense 时应将其边界放在 Provider 内部。
+`QueryProvider` 接收 `QueryClientConfig`，内部创建并复用实例，构造配置仅初始化时生效：
 
 ```tsx
-<QueryProvider
-  defaultOptions={{
-    queries: { staleTime: 30_000, persister: createQueryPersister() },
-    mutations: { retry: false },
-  }}
-  onQuery={(event, client) => {
-    if (event.type === 'updated' && event.action.type === 'error') {
-      handleQueryError(client, event.action.error);
-    }
-  }}>
+<QueryProvider defaultOptions={{ queries: { staleTime: 30_000 } }}>
   {children}
 </QueryProvider>
 ```
 
-`createQueryPersister` 和 `handleQueryError` 由宿主实现。未传 `persister` 时只有内存缓存。
-`onQuery`／`onMutation` 继续只在对应缓存发生错误时调用，第一参数为官方完整事件，
-第二参数为该 Provider 的 client；回调变化或组件卸载时取消旧订阅。
-
-组件和自定义 Hook 使用 `@tanstack/react-query` 的 `useQueryClient()` 获取最近的实例。
-普通业务方法显式接收 `QueryClient` 参数，由调用方传入。不再导出全局 `getQueryClient`
-或 `clearQueryClient`，也不另外维护一个全局客户端。
-
-`client.clear()` 只清理该实例的查询和 mutation 内存缓存。宿主启用持久化后自行负责
-退出登录时的磁盘清理及旧请求防回写；页面内表单、弹窗等本地状态仍由宿主会话边界重置。
+默认查询 `staleTime` 为开发10秒／生产1分钟，`gcTime` 为5分钟，`retry` 为 `false`，
+传入的查询配置按字段覆盖默认值。默认无持久化，宿主通过 `defaultOptions.queries.persister` 提供。
+`onQuery`／`onMutation` 仅通知错误事件，参数为官方事件和当前 client。
+组件用 `@tanstack/react-query` 的 `useQueryClient()` 获取实例，普通方法由调用方传入 client。
