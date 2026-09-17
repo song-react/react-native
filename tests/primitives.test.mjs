@@ -68,7 +68,6 @@ mock.module('expo-blur', () => ({ BlurView: 'blur-view' }));
 const { useColors } = await import('../src/hooks/use-colors');
 const { useScreen } = await import('../src/hooks/use-screen');
 const { View } = await import('../src/components/View');
-const { ScrollView } = await import('../src/components/ScrollView');
 const { Image } = await import('../src/components/Image');
 const { Modal } = await import('../src/components/Modal');
 const { Text } = await import('../src/components/Text');
@@ -305,23 +304,21 @@ test('切换主题后基础组件使用当前颜色，调用方样式仍优先',
       _flatten(Modal.render({}, null).props.children[1].props.style)
         .backgroundColor
     ).toBe(_palette.background);
-    for (const _Component of [View, ScrollView]) {
-      expect(
-        _flatten(_Component.render({}, null).props.style).backgroundColor
-      ).toBe('transparent');
-      expect(
-        _flatten(_Component.render({ type: 'foreground' }, null).props.style)
-          .backgroundColor
-      ).toBe(_palette.foreground);
-      expect(
-        _flatten(
-          _Component.render(
-            { type: 'background', style: { backgroundColor: 'red' } },
-            null
-          ).props.style
-        ).backgroundColor
-      ).toBe('red');
-    }
+    expect(_flatten(View.render({}, null).props.style).backgroundColor).toBe(
+      'transparent'
+    );
+    expect(
+      _flatten(View.render({ type: 'foreground' }, null).props.style)
+        .backgroundColor
+    ).toBe(_palette.foreground);
+    expect(
+      _flatten(
+        View.render(
+          { type: 'background', style: { backgroundColor: 'red' } },
+          null
+        ).props.style
+      ).backgroundColor
+    ).toBe('red');
   }
 });
 

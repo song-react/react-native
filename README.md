@@ -1,7 +1,8 @@
 # @song-react/react-native
 
 React Native 的透明增强入口：完整导出原生能力，并以增强版 `Image`、
-`Modal`、`Pressable`、`ScrollView`、`Text`、`TextInput`、`View` 覆盖同名导出。
+`Modal`、`Pressable`、`Text`、`TextInput`、`View` 覆盖同名导出。
+`ScrollView` 直接透传 React Native 原生组件及类型。
 基础组件沿用 `xz_rn` 的默认布局、字体和尺寸规则；业务颜色由入口配置，显式样式始终优先。
 在应用入口调用一次 `useColors.set(colors)`，不需要额外 Provider。
 
@@ -61,7 +62,7 @@ React Native 的 `useColorScheme()`／`Appearance`，不增加 Context 或独立
 `xs=440`、`sm=667`、`md=774`、`lg=1133`、`xl=1280`、`xxl=1536`。
 组件默认字号、输入框间距和弹窗间距使用该缩放；调用方显式尺寸不二次缩放，页面整体宽度仍采用父子布局。
 
-`View`／`ScrollView` 支持 `type='background'`／`'foreground'`，默认透明。
+`View` 支持 `type='background'`／`'foreground'`，默认透明。
 `Text` 默认使用 `fill`、PingFang SC，并关闭系统字号缩放，保留链接／提及／自定义解析。
 `TextInput` 保留 `prefix`、`suffix`、`contentStyle`、`containerProps` 及原生事件／ref；
 不含标题、描述、错误提示或额外表单内容，交由业务表单组合。输入文字不会被组件二次写回。
@@ -85,7 +86,7 @@ Expo 工程在 `tsconfig.json` 中将原生入口指向本包；Expo Metro 会�
 确实需要绕过增强版输入框时，从同一入口使用 `NativeTextInput`。
 
 基础组件放在 `src/components/`，Provider 放在 `src/providers/`。导出与 `xz_rn`
-基础层一致的 `Image`、`Modal`、`Pressable`、`ScrollView`、`Text`、`TextInput`、`View`；
+基础层对应的 `Image`、`Modal`、`Pressable`、`Text`、`TextInput`、`View`；
 不额外封装 Flex 布局组件。
 
 同时直接导出固定为 2.3.2 的 `FlashList` 修正版。实际实现来自
