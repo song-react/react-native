@@ -1,4 +1,4 @@
-import { forwardRef, type ComponentRef } from 'react';
+import { forwardRef, type ComponentRef, type ForwardedRef } from 'react';
 import {
   Pressable as _Pressable,
   type PressableProps as _PressableProps,
@@ -6,10 +6,10 @@ import {
 
 export type PressableProps = _PressableProps;
 
-export const Pressable = forwardRef<
-  ComponentRef<typeof _Pressable>,
-  PressableProps
->(({ style, disabled, ...props }, ref) => (
+const PressableImp = (
+  { style, disabled, ...props }: PressableProps,
+  ref: ForwardedRef<ComponentRef<typeof _Pressable>>
+) => (
   <_Pressable
     ref={ref}
     disabled={disabled}
@@ -20,4 +20,6 @@ export const Pressable = forwardRef<
     }
     {...props}
   />
-));
+);
+
+export const Pressable = forwardRef(PressableImp);
