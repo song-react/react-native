@@ -8,7 +8,8 @@
   "sideEffects": false,
   "files": [
     "patches",
-    "src"
+    "src",
+    "AGENTS.md"
   ],
   "dependencies": {
     "@song-react/flash-list": "github:song-react/flash-list#f5e2425"

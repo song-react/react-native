@@ -1,5 +1,7 @@
 # @song-react/react-native
 
+接入或修改前请阅读 [AGENTS.md：基本用法与开发约束](./AGENTS.md)。
+
 React Native 的透明增强入口：完整导出原生能力，并以增强版 `Image`、
 `Modal`、`Pressable`、`Text`、`TextInput`、`View` 覆盖同名导出。
 `ScrollView` 直接透传 React Native 原生组件及类型。
@@ -83,13 +85,17 @@ Expo 工程在 `tsconfig.json` 中将原生入口指向本包；Expo Metro 会�
 {
   "compilerOptions": {
     "paths": {
+      "@/*": ["./*"],
       "react-native": ["./node_modules/@song-react/react-native"]
     }
   }
 }
 ```
 
-确实需要绕过增强版输入框时，从同一入口使用 `NativeTextInput`。
+宿主统一使用 `import { xxx } from 'react-native'`，优先经本桥接工程解析。
+**不能以 `react-native/index.js`、上游同名包或本地复制件绕过中转层。**
+需要原生输入框时，从同一入口使用公开的 `NativeTextInput`。
+库内部的上游透传实现不属于宿主可采用的绕过方式，详见 [AGENTS.md](./AGENTS.md)。
 
 基础组件放在 `src/components/`，Provider 放在 `src/providers/`。导出与 `xz_rn`
 基础层对应的 `Image`、`Modal`、`Pressable`、`Text`、`TextInput`、`View`；
