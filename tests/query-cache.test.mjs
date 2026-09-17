@@ -91,3 +91,20 @@ test('清理时尚未结束的请求不能重新写入内存或磁盘', async ()
   expect(getQueryClient().getQueryCache().getAll()).toHaveLength(0);
   expect(_disk.size).toBe(0);
 });
+
+test('持久化使用普通 JSON，保留看似 BigInt 标记的业务字符串', async () => {
+  const _client = getQueryClient();
+  const _data = {
+    text: '__bigint__123',
+    amount: '123456789012345678.90',
+    count: 0,
+  };
+  await _client.fetchQuery({ queryKey: ['json'], queryFn: () => _data });
+  await _settle();
+  _client.removeQueries();
+  const _network = mock(() => null);
+  expect(
+    await _client.fetchQuery({ queryKey: ['json'], queryFn: _network })
+  ).toEqual(_data);
+  expect(_network).not.toHaveBeenCalled();
+});

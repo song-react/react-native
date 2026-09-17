@@ -127,7 +127,8 @@ declare global {
 ```
 
 `QueryProvider` 内置与 `xz_rn` 一致的 `QueryClient`：开发环境 10 秒、生产环境 1 分钟
-过期，5 分钟回收内存，关闭自动重试，并使用 MMKV 按 query 独立持久化 7 天。需要在
+过期，5 分钟回收内存，关闭自动重试，并使用 MMKV 按 query 独立持久化 7 天。
+持久化直接使用默认 JSON 序列化，不转换 BigInt，也不需要宿主配置存储。需要在
 React 组件外操作缓存时使用同包导出的 `getQueryClient()`。可通过 `onQuery` 和
 `onMutation` 分别接收全局查询、操作错误，由宿主决定日志、线路切换等业务处理。
 

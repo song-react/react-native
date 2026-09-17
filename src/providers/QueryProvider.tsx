@@ -33,16 +33,6 @@ const _createPersister = () => {
         }),
     },
     maxAge: 7 * 24 * 60 * 60 * 1000,
-    serialize: data =>
-      JSON.stringify(data, (_key, value) =>
-        typeof value === 'bigint' ? `__bigint__${value.toString()}` : value
-      ),
-    deserialize: data =>
-      JSON.parse(data, (_key, value) =>
-        typeof value === 'string' && value.startsWith('__bigint__')
-          ? BigInt(value.slice(10))
-          : value
-      ),
   }).persisterFn;
 };
 
