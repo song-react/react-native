@@ -1,4 +1,5 @@
 /* eslint-disable react-hooks/rules-of-hooks -- 使用受控 Hook 替身验证组件，不经过 React 渲染器。 */
+import normalizeColor from '@react-native/normalize-colors';
 import { beforeEach, expect, mock, test } from 'bun:test';
 import * as React from 'react';
 
@@ -49,6 +50,14 @@ mock.module('react-native/index.js', () => ({
   useColorScheme: () => _scheme,
   Text: 'native-text',
   TextInput: 'native-input',
+  processColor: _color => {
+    if (typeof _color === 'object') return _color;
+    const _normalized = normalizeColor(_color);
+    // 与RN processColor一致，将真实解析器的RRGGBBAA转换成AARRGGBB。
+    return typeof _normalized === 'number'
+      ? ((_normalized << 24) | (_normalized >>> 8)) >>> 0
+      : undefined;
+  },
   Pressable: 'native-pressable',
   Modal: 'native-modal',
   Image: _nativeImage,
@@ -155,7 +164,7 @@ test('Text同时保留链接、提及与自定义内容解析', () => {
   expect(_custom).toHaveBeenCalledWith('[图片]');
 });
 
-test('TextInput缺省contentStyle不崩溃，containerProps与两种样式透传', () => {
+test('TextInput透传容器属性、输入样式与前后缀', () => {
   const _layout = mock();
   const _element = TextInput.render(
     {
@@ -171,12 +180,13 @@ test('TextInput缺省contentStyle不崩溃，containerProps与两种样式透传
   expect(_element.props.children[2]).toBe('后');
   const _styled = TextInput.render(
     {
-      contentStyle: [{ backgroundColor: 'white' }, false],
+      style: [{ color: 'red' }, false],
       containerProps: { style: { backgroundColor: 'blue' } },
     },
     null
   );
   expect(_flatten(_styled.props.style).backgroundColor).toBe('blue');
+  expect(_flatten(_styled.props.children[1].props.style).color).toBe('red');
 });
 
 test('TextInput快速输入不二次写回原生文本，ref和焦点事件保持一致', () => {
@@ -346,4 +356,58 @@ test('屏幕尺寸改变后重新计算xz缩放、方向与断点', () => {
   expect(_flatten(Text.render({}, null).props.style).fontSize).toBeCloseTo(
     useScreen().fix(15)
   );
+});
+
+test.each([
+  ['#abc', 0xaabbcca0],
+  ['#aabbcc', 0xaabbcca0],
+  ['#abc8', 0xaabbcc55],
+  ['#11223380', 0x11223350],
+  ['rgb(10, 20, 30)', 0x0a141ea0],
+  ['rgba(10, 20, 30, 0.5)', 0x0a141e50],
+  ['hsl(120, 100%, 50%)', 0x00ff00a0],
+  ['hsla(120, 100%, 50%, 0.5)', 0x00ff0050],
+  ['hwb(240 0% 0%)', 0x0000ffa0],
+  ['red', 0xff0000a0],
+  ['transparent', 0],
+])('禁用输入框支持%s，仅叠加背景透明度', (_color, _expected) => {
+  useColors.set({ light: { ..._light, background: _color } });
+  const _prefix = { marker: '前缀' };
+  const _suffix = { marker: '后缀' };
+  const _element = TextInput.render(
+    { editable: false, prefix: _prefix, suffix: _suffix },
+    null
+  );
+  const _style = _flatten(_element.props.style);
+  expect(normalizeColor(_style.backgroundColor)).toBe(_expected);
+  expect(_style.opacity).toBeUndefined();
+  expect(_flatten(_element.props.children[1].props.style).color).toBe(
+    _light.fill
+  );
+  expect(_element.props.children[0]).toBe(_prefix);
+  expect(_element.props.children[2]).toBe(_suffix);
+  expect(
+    _flatten(TextInput.render({ editable: true }, null).props.style)
+      .backgroundColor
+  ).toBe(_color);
+});
+
+test('原生颜色对象保持透传，显式背景覆盖仍然优先', () => {
+  const _nativeColor = { semantic: ['systemBackgroundColor'] };
+  useColors.set({ light: { ..._light, background: _nativeColor } });
+  expect(
+    _flatten(TextInput.render({ editable: false }, null).props.style)
+      .backgroundColor
+  ).toBe(_nativeColor);
+  expect(
+    _flatten(
+      TextInput.render(
+        {
+          editable: false,
+          containerProps: { style: { backgroundColor: 'blue' } },
+        },
+        null
+      ).props.style
+    ).backgroundColor
+  ).toBe('blue');
 });

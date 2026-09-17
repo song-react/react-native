@@ -2,6 +2,7 @@ import { ComponentRef, ForwardedRef, forwardRef } from 'react';
 import {
   TextInput as _TextInput,
   type TextInputProps as _TextInputProps,
+  processColor,
 } from 'react-native/index.js';
 import { useColors } from '../hooks/use-colors';
 import { useScreen } from '../hooks/use-screen';
@@ -29,6 +30,9 @@ const _TextInputImp = function TextInputImp(
   const colors = useColors();
   const { fix } = useScreen();
   const borderRadius = fix(8);
+  // RN 返回 AARRGGBB，仅缩放 alpha，保留背景已有的透明度。
+  const _background =
+    props.editable === false ? processColor(colors.background) : undefined;
 
   return (
     <View
@@ -38,9 +42,9 @@ const _TextInputImp = function TextInputImp(
           flexDirection: 'row',
           alignItems: 'center',
           backgroundColor:
-            props.editable !== false
-              ? colors.background
-              : colors.background + 'A0',
+            typeof _background === 'number'
+              ? `rgba(${(_background >>> 16) & 255}, ${(_background >>> 8) & 255}, ${_background & 255}, ${((_background >>> 24) / 255) * (160 / 255)})`
+              : colors.background,
           borderRadius,
           paddingHorizontal: borderRadius * 2,
           columnGap: 8,
