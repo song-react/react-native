@@ -1,20 +1,67 @@
 # @song-react/react-native
 
-React Native 的透明增强入口：完整导出原生能力，并以无业务主题的增强版 `Image`、
+React Native 的透明增强入口：完整导出原生能力，并以增强版 `Image`、
 `Modal`、`Pressable`、`ScrollView`、`Text`、`TextInput`、`View` 覆盖同名导出。
-组件不缩放设计尺寸，只提供根属性透传、默认样式与外部样式合并；颜色和具体尺寸由业务工程覆盖。
+基础组件沿用 `xz_rn` 的默认布局、字体和尺寸规则；业务颜色由入口配置，显式样式始终优先。
+升级后，使用这些组件的界面须位于 `ColorsProvider` 内。
 
 ```tsx
-import { FlashList, Pressable, Text, TextInput, View } from 'react-native';
+import { ColorsProvider, Text, TextInput, View } from 'react-native';
 
-<View style={{ gap: 12 }}>
-  <Text style={{ color: '#252E3A' }}>金额</Text>
-  <TextInput contentStyle={{ backgroundColor: '#fff' }} />
-  <Pressable style={{ backgroundColor: '#0065FF' }}>
-    <Text style={{ color: '#fff' }}>确认</Text>
-  </Pressable>
-</View>;
+export const colors = {
+  light: {
+    background: '#ECF0FA',
+    foreground: '#FFFFFF',
+    empty: '#F1F5FF',
+    fill: '#252E3A',
+    primary: '#0065FF',
+  },
+} as const;
+
+declare global {
+  interface SongReactNativeColors {
+    colors: typeof colors;
+  }
+}
+
+export default () => (
+  <ColorsProvider colors={colors}>
+    <View type='foreground'>
+      <Text>金额</Text>
+      <TextInput placeholder='请输入金额' />
+    </View>
+  </ColorsProvider>
+);
 ```
+
+颜色采用与 I18n 相同的“入口配置＋一次类型注册”：各处直接调用 `useColors()`，
+自动提示注册色板中的业务色和渐变对象，无需每次传泛型。`light` 必填、`dark` 可选，
+每套色板都必须含以下四个基本颜色（支持 React Native `ColorValue`）：
+
+| 色名         | 用途                         |
+| ------------ | ---------------------------- |
+| `background` | 背景、分割线、输入框背景     |
+| `foreground` | 模块、卡片等比背景突出的表面 |
+| `empty`      | 留空区域和大背景，与前景对应 |
+| `fill`       | 文字、图标等内容填充色       |
+
+默认跟随系统，也可通过 `colorScheme='light'`／`'dark'` 手动指定；传 `null` 或
+省略时恢复跟随系统。缺少 `dark` 时统一回退到 `light`。各主题业务字段宜保持一致，
+`useColors()` 返回主题色板的联合类型，避免误用某一主题没有的字段。
+也支持 xz 的临时颜色对：`useColors([['white', 'black']] as const)`，按生效主题返回。
+
+`useScreen()` 返回当前 `width`、`height`、`landscape`、`fix(size)` 和断点状态。
+`fix(size) = size × (width / 375)^1.3`，随窗口尺寸变化更新；断点依次为
+`xs=440`、`sm=667`、`md=774`、`lg=1133`、`xl=1280`、`xxl=1536`。
+组件默认字号、输入框间距和弹窗间距使用该缩放；调用方显式尺寸不二次缩放，页面整体宽度仍采用父子布局。
+
+`View`／`ScrollView` 支持 `type='background'`／`'foreground'`，默认透明。
+`Text` 默认使用 `fill`、PingFang SC，并关闭系统字号缩放，保留链接／提及／自定义解析。
+`TextInput` 保留 `prefix`、`suffix`、`contentStyle`、`containerProps` 及原生事件／ref；
+不含标题、描述、错误提示或额外表单内容，交由业务表单组合。输入文字不会被组件二次写回。
+`Modal` 沿用原生 `animationType`：`slide` 默认底部，`fade` 默认居中；遮罩高度为窗口两倍，
+向上延伸一个窗口高度，淡入和点击遮罩淡出均为 150ms，淡出完成后调用 `onRequestClose`。
+`Image` 保留 SVG 组件直传、位图加载后宽高比测量和缓存清理方法，根 `width`／`height` 进入位图布局。
 
 Expo 工程在 `tsconfig.json` 中将原生入口指向本包；Expo Metro 会读取同一别名，无需额外
 修改 `metro.config.js`：

@@ -1,63 +1,120 @@
-import { forwardRef, type ComponentRef } from 'react';
+import { ComponentRef, ForwardedRef, forwardRef, useEffect } from 'react';
 import {
   Modal as _Modal,
-  Pressable as _Pressable,
+  Animated,
+  StyleProp,
+  useAnimatedValue,
+  ViewStyle,
   type ModalProps as _ModalProps,
-  type StyleProp,
-  type ViewStyle,
 } from 'react-native/index.js';
+import { useScreen } from '../hooks/use-screen';
+import { useColors } from '../providers/ColorsProvider';
+import { Pressable } from './Pressable';
 import { View } from './View';
 
 export type ModalProps = Omit<_ModalProps, 'backdropColor'> & {
   containerStyle?: StyleProp<ViewStyle>;
 };
 
-export const Modal = forwardRef<ComponentRef<typeof _Modal>, ModalProps>(
-  (
-    {
-      children,
-      containerStyle,
-      animationType = 'fade',
-      onRequestClose,
-      ...props
-    },
-    ref
-  ) => (
+const ModalImp = (
+  {
+    containerStyle,
+    children,
+    animationType,
+    onRequestClose,
+    visible = true,
+    ...props
+  }: ModalProps,
+  ref: ForwardedRef<ComponentRef<typeof _Modal>>
+) => {
+  const colors = useColors();
+  const { height, fix } = useScreen();
+  const opacity = useAnimatedValue(0);
+
+  useEffect(() => {
+    opacity.setValue(0);
+    if (visible) {
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }).start();
+    }
+    return () => opacity.stopAnimation();
+  }, [opacity, visible]);
+
+  return (
     <_Modal
       ref={ref}
-      transparent
       animationType={animationType}
+      transparent={true}
+      visible={visible}
       onRequestClose={onRequestClose}
-      {...props}
-    >
-      <View
+      {...props}>
+      {/* 背景：点击关闭 */}
+      <Animated.View
         style={{
-          flex: 1,
-          justifyContent: animationType === 'slide' ? 'flex-end' : 'center',
-          alignItems: 'center',
-          paddingHorizontal: animationType === 'slide' ? 0 : 12,
+          position: 'absolute',
+          width: '100%',
+          height: height * 2,
+          top: -height,
+          opacity,
           backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        }}
-      >
-        <_Pressable
-          onPress={onRequestClose}
-          style={{ position: 'absolute', inset: 0 }}
+        }}>
+        <Pressable
+          onPress={
+            onRequestClose
+              ? e => {
+                  Animated.timing(opacity, {
+                    toValue: 0,
+                    duration: 150,
+                    useNativeDriver: true,
+                  }).start(({ finished }) => {
+                    if (finished) onRequestClose(e);
+                  });
+                }
+              : undefined
+          }
+          style={{ flex: 1 }}
         />
-        <View
-          style={[
-            {
-              width: animationType === 'slide' ? '100%' : 'auto',
-              maxWidth: '100%',
-              maxHeight: '80%',
-              padding: 12,
-              borderRadius: 10,
-            },
-            containerStyle,
-          ]}
-        >
-          {children}
-        </View>
+      </Animated.View>
+      {/* 内容：不在 Pressable 里，阻断冒泡 */}
+      <View
+        style={[
+          {
+            backgroundColor: colors.background,
+            padding: fix(12),
+            borderRadius: fix(10),
+          },
+          {
+            position: 'absolute',
+            maxHeight: '80%',
+            ...(animationType !== 'slide'
+              ? {
+                  top: '50%',
+                  left: '50%',
+                  transform: [{ translateX: '-50%' }, { translateY: '-50%' }],
+                  width: 'auto',
+                  shadowColor: '#000',
+                  shadowOffset: {
+                    width: 1,
+                    height: 1,
+                  },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 15,
+                  elevation: 5,
+                }
+              : {
+                  bottom: 0,
+                  width: '100%',
+                }),
+          },
+          containerStyle,
+        ]}>
+        {children}
       </View>
     </_Modal>
-  )
-);
+  );
+};
+
+export const Modal = forwardRef(ModalImp);

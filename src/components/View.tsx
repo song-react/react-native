@@ -6,12 +6,28 @@ import {
   type ViewStyle as _ViewStyle,
 } from 'react-native/index.js';
 
+import { useColors } from '../providers/ColorsProvider';
+
 export type ViewStyle = _ViewStyle;
-export type ViewProps = _ViewProps | BlurViewProps;
+export type ViewProps = (_ViewProps | BlurViewProps) & {
+  type?: 'default' | 'background' | 'foreground';
+};
 
 export const View = forwardRef<ComponentRef<typeof _View>, ViewProps>(
-  ({ style, ...props }, ref) => {
+  ({ type = 'default', style, ...props }, ref) => {
+    const colors = useColors();
     const Component = 'intensity' in props ? BlurView : _View;
-    return <Component ref={ref} style={style} {...props} />;
+    return (
+      <Component
+        ref={ref}
+        style={[
+          {
+            backgroundColor: type === 'default' ? 'transparent' : colors[type],
+          },
+          style,
+        ]}
+        {...props}
+      />
+    );
   }
 );

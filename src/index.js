@@ -1,7 +1,15 @@
 const Native = require('react-native/index.js');
 
 const nativeDescriptors = Object.getOwnPropertyDescriptors(Native);
-for (const name of ['Image', 'Modal', 'Pressable', 'Text', 'TextInput', 'View'])
+for (const name of [
+  'Image',
+  'Modal',
+  'Pressable',
+  'ScrollView',
+  'Text',
+  'TextInput',
+  'View',
+])
   delete nativeDescriptors[name];
 Object.defineProperties(module.exports, nativeDescriptors);
 
@@ -41,3 +49,11 @@ lazy(
   'clearQueryClient',
   () => require('./providers/QueryProvider').clearQueryClient
 );
+
+lazy('ScrollView', () => require('./components/ScrollView').ScrollView);
+lazy(
+  'ColorsProvider',
+  () => require('./providers/ColorsProvider').ColorsProvider
+);
+lazy('useColors', () => require('./providers/ColorsProvider').useColors);
+lazy('useScreen', () => require('./hooks/use-screen').useScreen);
