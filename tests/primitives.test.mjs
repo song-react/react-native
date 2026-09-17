@@ -89,7 +89,7 @@ test('位图根宽高进入原生布局，显式style仍可覆盖', () => {
   const _image = Image.render(
     { source: 1, width: 120, height: 80, style: { width: 150 } },
     null
-  ).props.children;
+  );
   expect(_image.type).toBe(_expoImage);
   expect(_flatten(_image.props.style)).toMatchObject({
     width: 150,
@@ -106,11 +106,9 @@ test('位图沿用onLoad测量与调用方回调，SVG维持直接传参', () =>
     onLoad: _onLoad,
   };
   const _event = { source: { width: 600, height: 300 } };
-  Image.render(_props, null).props.children.props.onLoad(_event);
+  Image.render(_props, null).props.onLoad(_event);
   expect(_onLoad).toHaveBeenCalledWith(_event);
-  expect(
-    _flatten(Image.render(_props, null).props.children.props.style).aspectRatio
-  ).toBe(2);
+  expect(_flatten(Image.render(_props, null).props.style).aspectRatio).toBe(2);
   const _svg = () => null;
   const _element = Image.render(
     { source: _svg, width: 16, height: 20, color: 'red' },

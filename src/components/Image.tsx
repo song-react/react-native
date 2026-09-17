@@ -31,34 +31,32 @@ const ImageImp = (
   }
 
   return (
-    <>
-      <_Image
-        ref={ref}
-        source={Source}
-        style={[
-          {
-            width: props.width as ViewStyle['width'],
-            height: props.height as ViewStyle['height'],
-            aspectRatio: shouldMeasureAspectRatio ? aspectRatio : undefined,
-          },
-          style,
-        ]}
-        placeholderContentFit='cover'
-        onLoad={e => {
-          const { width, height } = e.source;
-          if (shouldMeasureAspectRatio && width && height) {
-            setAspectRatio(width / height);
-          }
-          onLoad?.(e);
-        }}
-        enforceEarlyResizing={true}
-        // priority={'low'}
-        // autoplay={false}
-        // useAppleWebpCodec={false}
-        // transition={null}
-        {...rest}
-      />
-    </>
+    <_Image
+      ref={ref}
+      source={Source}
+      style={[
+        {
+          width: props.width as ViewStyle['width'],
+          height: props.height as ViewStyle['height'],
+          aspectRatio: shouldMeasureAspectRatio ? aspectRatio : undefined,
+        },
+        style,
+      ]}
+      placeholderContentFit='cover'
+      onLoad={e => {
+        const { width, height } = e.source;
+        if (shouldMeasureAspectRatio && width && height) {
+          setAspectRatio(width / height);
+        }
+        onLoad?.(e);
+      }}
+      enforceEarlyResizing={true}
+      // priority={'low'}
+      // autoplay={false}
+      // useAppleWebpCodec={false}
+      // transition={null}
+      {...rest}
+    />
   );
 };
 
