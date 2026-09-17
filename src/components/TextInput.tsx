@@ -2,8 +2,6 @@ import { ComponentRef, ForwardedRef, forwardRef } from 'react';
 import {
   TextInput as _TextInput,
   type TextInputProps as _TextInputProps,
-  StyleProp,
-  ViewStyle,
 } from 'react-native/index.js';
 import { useColors } from '../hooks/use-colors';
 import { useScreen } from '../hooks/use-screen';
@@ -11,7 +9,6 @@ import { View, ViewProps } from './View';
 
 export type TextInputProps = Omit<_TextInputProps, 'children'> & {
   containerProps?: ViewProps;
-  contentStyle?: StyleProp<ViewStyle>;
   prefix?: React.ReactNode;
   suffix?: React.ReactNode;
 };
@@ -19,7 +16,6 @@ export type TextInputProps = Omit<_TextInputProps, 'children'> & {
 const TextInputImp = (
   {
     containerProps,
-    contentStyle,
     prefix,
     suffix,
     onFocus,
@@ -41,17 +37,18 @@ const TextInputImp = (
         {
           flexDirection: 'row',
           alignItems: 'center',
-          backgroundColor: colors.background,
+          backgroundColor:
+            props.editable !== false
+              ? colors.background
+              : colors.background + 'A0',
           borderRadius,
           paddingHorizontal: borderRadius * 2,
           columnGap: 8,
-          opacity: props.editable === false ? 0.6 : 1,
         },
         {
           borderWidth: 1,
           borderColor: 'transparent',
         },
-        contentStyle,
         containerProps?.style,
       ]}>
       {prefix}
@@ -66,6 +63,7 @@ const TextInputImp = (
             color: colors.fill,
             fontWeight: 400,
           },
+          { fontFamily: 'PingFang SC' },
           style,
         ]}
         allowFontScaling={false}

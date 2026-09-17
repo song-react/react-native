@@ -66,6 +66,8 @@ React Native 的 `useColorScheme()`／`Appearance`，不增加 Context 或独立
 `Text` 默认使用 `fill`、PingFang SC，并关闭系统字号缩放，保留链接／提及／自定义解析。
 `TextInput` 保留 `prefix`、`suffix`、`contentStyle`、`containerProps` 及原生事件／ref；
 不含标题、描述、错误提示或额外表单内容，交由业务表单组合。输入文字不会被组件二次写回。
+输入框背景使用六位十六进制 `background` 色值；`editable={false}` 时追加 `A0` 背景透明度，
+文字及前后缀不随容器变淡，显式传入的背景样式仍然优先。
 `Modal` 沿用原生 `animationType`：`slide` 默认底部，`fade` 默认居中；遮罩高度为窗口两倍，
 向上延伸一个窗口高度，淡入和点击遮罩淡出均为 150ms，淡出完成后调用 `onRequestClose`。
 `Image` 保留 SVG 组件直传、位图加载后宽高比测量和缓存清理方法，根 `width`／`height` 进入位图布局。
