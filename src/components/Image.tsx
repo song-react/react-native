@@ -1,5 +1,5 @@
 import { Image as _Image, type ImageProps as _ImageProps } from 'expo-image';
-import React, { ComponentRef, ForwardedRef, forwardRef } from 'react';
+import React, { ComponentRef, ForwardedRef, forwardRef, useState } from 'react';
 import { SvgProps } from 'react-native-svg';
 import { Image as __Image, type ViewStyle } from 'react-native/index.js';
 
@@ -16,7 +16,15 @@ const _ImageImp = function ImageImp(
   { source: Source, ...props }: ImageProps,
   ref: ForwardedRef<ComponentRef<typeof _Image>>
 ) {
-  const { style, ...rest } = props;
+  const [aspectRatio, setAspectRatio] = useState<undefined | number>(undefined);
+
+  const { style, onLoad, ...rest } = props;
+  const shouldMeasureAspectRatio =
+    typeof Source !== 'function' &&
+    !Array.isArray(style) &&
+    (props.width == null || props.height == null) &&
+    style?.aspectRatio == null &&
+    (style?.width == null || style?.height == null);
 
   if (typeof Source === 'function') {
     return <Source {...props} />;
@@ -30,10 +38,18 @@ const _ImageImp = function ImageImp(
         {
           width: props.width as ViewStyle['width'],
           height: props.height as ViewStyle['height'],
+          aspectRatio: shouldMeasureAspectRatio ? aspectRatio : undefined,
         },
         style,
       ]}
       placeholderContentFit='cover'
+      onLoad={e => {
+        const { width, height } = e.source;
+        if (shouldMeasureAspectRatio && width && height) {
+          setAspectRatio(width / height);
+        }
+        onLoad?.(e);
+      }}
       enforceEarlyResizing={true}
       // priority={'low'}
       // autoplay={false}
