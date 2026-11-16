@@ -1,7 +1,7 @@
 import {
   forwardRef,
   useEffect,
-  useEffectEvent,
+  useLayoutEffect,
   useRef,
   useState,
   type ComponentProps,
@@ -63,13 +63,18 @@ const _ModalImp = function ModalImp(
   const requestedVisible = useRef(false);
   const progress = useSharedValue(0);
   const contentHeight = useSharedValue(height);
-  const onDismissed = useEffectEvent(() => {
-    requestedVisible.current = false;
-    setMounted(false);
-    onDismiss?.();
-  });
+  const dismiss = useRef(onDismiss);
+  // React 19.2 的 forwardRef 不会更新 Effect Event，退场回调显式读取最新值。
+  useLayoutEffect(() => {
+    dismiss.current = onDismiss;
+  }, [onDismiss]);
 
   useEffect(() => {
+    const onDismissed = () => {
+      requestedVisible.current = false;
+      setMounted(false);
+      dismiss.current?.();
+    };
     if (visible) requestedVisible.current = true;
     // 分次挂载保证父窗口先就绪，子窗口随后加入，嵌套层始终显示在父层上方。
     if (visible && !mounted) {
