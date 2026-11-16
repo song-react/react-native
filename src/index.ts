@@ -8,7 +8,7 @@ export { TextInput as NativeTextInput } from 'react-native/index.js';
 export type { TextInputProps as NativeTextInputProps } from 'react-native/index.js';
 export { Image } from './components/Image';
 export type { ImageProps as EnhancedImageProps } from './components/Image';
-export { Modal } from './components/Modal';
+export { Modal, type ModalProps } from './components/Modal';
 export { Pressable } from './components/Pressable';
 export { Text } from './components/Text';
 export { TextInput } from './components/TextInput';
