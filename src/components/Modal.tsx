@@ -25,7 +25,6 @@ import { Pressable } from './Pressable';
 import { View } from './View';
 
 const AnimatedView = Animated.createAnimatedComponent(View);
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export type ModalProps = Pick<
   _ModalProps,
@@ -56,7 +55,7 @@ const _ModalImp = function ModalImp(
     onRequestClose,
     onDismiss,
   }: ModalProps,
-  ref: ForwardedRef<ComponentRef<typeof AnimatedPressable>>
+  ref: ForwardedRef<ComponentRef<typeof AnimatedView>>
 ) {
   const { fix, height } = useScreen();
   const [mounted, setMounted] = useState(false);
@@ -135,12 +134,17 @@ const _ModalImp = function ModalImp(
   if (!mounted) return null;
   return (
     <FullWindowOverlay>
-      <AnimatedPressable
+      <AnimatedView
         ref={ref}
         collapsable={false}
         pointerEvents={visible ? pointerEvents : 'none'}
-        onPress={visible ? onRequestClose : undefined}
         style={[{ flex: 1 }, backdropStyle, style]}>
+        {visible && onRequestClose ? (
+          <Pressable
+            onPress={onRequestClose}
+            style={{ position: 'absolute', inset: 0 }}
+          />
+        ) : null}
         <AnimatedView
           pointerEvents='box-none'
           style={[
@@ -152,11 +156,10 @@ const _ModalImp = function ModalImp(
             },
             contentStyle,
           ]}>
-          <AnimatedPressable
+          <AnimatedView
             onLayout={event =>
               contentHeight.set(event.nativeEvent.layout.height)
             }
-            onPress={event => event.stopPropagation()}
             style={[
               {
                 width: animationType === 'slide' ? '100%' : 'auto',
@@ -168,9 +171,9 @@ const _ModalImp = function ModalImp(
               containerStyle,
             ]}>
             {children}
-          </AnimatedPressable>
+          </AnimatedView>
         </AnimatedView>
-      </AnimatedPressable>
+      </AnimatedView>
     </FullWindowOverlay>
   );
 };
