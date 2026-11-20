@@ -132,25 +132,21 @@ const _ModalImp = function ModalImp(
   }));
 
   if (!mounted) return null;
-  const boxOnly = pointerEvents === 'box-only';
   return (
     <FullWindowOverlay>
       <AnimatedView
         ref={ref}
         collapsable={false}
-        pointerEvents={visible ? (boxOnly ? 'auto' : pointerEvents) : 'none'}
+        pointerEvents={visible ? pointerEvents : 'none'}
         style={[{ flex: 1 }, backdropStyle, style]}>
-        {visible &&
-        pointerEvents !== 'box-none' &&
-        pointerEvents !== 'none' &&
-        onRequestClose ? (
+        {visible && onRequestClose ? (
           <Pressable
             onPress={onRequestClose}
             style={{ position: 'absolute', inset: 0 }}
           />
         ) : null}
         <AnimatedView
-          pointerEvents={boxOnly ? 'none' : 'box-none'}
+          pointerEvents='box-none'
           style={[
             {
               flex: 1,
