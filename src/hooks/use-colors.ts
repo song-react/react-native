@@ -12,7 +12,7 @@ export type BaseColors = {
 };
 
 declare global {
-  // 宿主通过接口合并注册色板，与 I18n 的类型入口一致。
+  // 宿主通过接口扩展色板类型，与 I18n 的类型入口一致。
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   interface SongReactNativeColors {}
 }
@@ -25,7 +25,20 @@ type ColorsMap = SongReactNativeColors extends {
   : ThemeMap;
 type Palette = NonNullable<ColorsMap[keyof ColorsMap & keyof ThemeMap]>;
 
-let _colors: ThemeMap | undefined;
+let _colors: ThemeMap = {
+  light: {
+    background: '#F5F5F5',
+    foreground: '#FFFFFF',
+    empty: '#000000',
+    fill: '#222629',
+  },
+  dark: {
+    background: '#2A3139',
+    foreground: '#222629',
+    empty: '#F5F7FB',
+    fill: '#DDE3EE',
+  },
+};
 
 export function useColors(): Palette;
 export function useColors<
@@ -36,11 +49,10 @@ export function useColors(
 ) {
   const _dark = useColorScheme() === 'dark';
   if (colors) return colors.map(_pair => _pair[_dark ? 1 : 0]);
-  if (!_colors) throw new Error('请先在应用入口调用 useColors.set');
   return (_dark ? (_colors.dark ?? _colors.light) : _colors.light) as Palette;
 }
 
-/** 在应用入口、渲染组件前配置一次色板；主题切换使用原生 Appearance。 */
+/** 可在渲染前整体替换默认色板；主题切换使用原生 Appearance。 */
 useColors.set = (colors: ColorsMap) => {
   _colors = colors;
 };
